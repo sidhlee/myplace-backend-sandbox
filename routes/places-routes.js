@@ -29,10 +29,22 @@ const DUMMY_PLACES = [
   },
 ];
 
-// Add your callbacks at the specified routes & methods
+// Add your callbacks at the specified routes(/api/places)
 router.get('/:pid', (req, res, next) => {
   const placeId = req.params.pid;
   const place = DUMMY_PLACES.find((place) => place.id === placeId);
+  res.json({ place });
+});
+
+// order of the routes matters.
+// /api/places/user will be matched by the above route
+router.get('/user/:uid', (req, res, next) => {
+  const userId = req.params.uid;
+
+  const place = DUMMY_PLACES.find((p) => {
+    return p.creator === userId;
+  });
+
   res.json({ place });
 });
 
