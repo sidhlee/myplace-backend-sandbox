@@ -1,5 +1,7 @@
 const express = require('express'); // have to require express in every file that uses it
 
+const HttpError = require('../models/http-error');
+
 const router = express.Router(); // run express's router factory to create router
 
 const DUMMY_PLACES = [
@@ -15,18 +17,6 @@ const DUMMY_PLACES = [
     },
     creator: 'u1',
   },
-  {
-    id: 'p2',
-    title: ' Park',
-    description: 'Beautiful park surrounded by sky scrapers in Youido, Seoul',
-    imageUrl: 'https://placem.at/places?w=1260&h=750&random=2',
-    address: '68 Yeouigongwon-ro, Yeoui-dong, Yeongdeungpo-gu, Seoul', // cspell: disable-line
-    location: {
-      lat: 37.524482,
-      lng: 126.919066,
-    },
-    creator: 'u2',
-  },
 ];
 
 // Add your callbacks at the specified routes(/api/places)
@@ -36,10 +26,8 @@ router.get('/:pid', (req, res, next) => {
   const place = DUMMY_PLACES.find((place) => place.id === placeId);
 
   if (!place) {
-    const error = new Error('Could not find a place for the given id');
-    error.code = 404;
-
-    throw error; // triggers error handler
+    // triggers error handler
+    throw new HttpError('Could not find a place for the given id', 404);
   }
 
   res.json({ place });
@@ -54,11 +42,9 @@ router.get('/user/:uid', (req, res, next) => {
     return p.creator === userId;
   });
   if (!place) {
-    const error = new Error('Could not find a place for the given id');
-    error.code = 404;
-
     // return to break (not that we need the returned value)
-    return next(error); // async callback must pass error to the next!
+    // async callback must pass error to the next!
+    return next(new HttpError('Could not find a place for the given id'), 404);
   }
 
   res.json({ place });
