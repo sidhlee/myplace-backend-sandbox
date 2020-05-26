@@ -5,6 +5,8 @@ const placesRoutes = require('./routes/places-routes');
 
 const app = express();
 
+app.use(bodyParser.json());
+
 // use your routes here
 // If no path is given, all route paths will be "exact"
 app.use('/api/places', placesRoutes); // routes are added at the given path

@@ -10,5 +10,7 @@ router.get('/:pid', placeControllers.getPlaceById);
 // /api/places/user will be matched by the above route
 router.get('/user/:uid', placeControllers.getPlaceByUser);
 
+router.post('/', placeControllers.createPlace);
+
 // and export with CJS module export
 module.exports = router;
