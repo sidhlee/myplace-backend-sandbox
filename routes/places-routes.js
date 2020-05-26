@@ -32,7 +32,16 @@ const DUMMY_PLACES = [
 // Add your callbacks at the specified routes(/api/places)
 router.get('/:pid', (req, res, next) => {
   const placeId = req.params.pid;
+
   const place = DUMMY_PLACES.find((place) => place.id === placeId);
+
+  if (!place) {
+    const error = new Error('Could not find a place for the given id');
+    error.code = 404;
+
+    throw error; // triggers error handler
+  }
+
   res.json({ place });
 });
 
@@ -44,6 +53,13 @@ router.get('/user/:uid', (req, res, next) => {
   const place = DUMMY_PLACES.find((p) => {
     return p.creator === userId;
   });
+  if (!place) {
+    const error = new Error('Could not find a place for the given id');
+    error.code = 404;
+
+    // return to break (not that we need the returned value)
+    return next(error); // async callback must pass error to the next!
+  }
 
   res.json({ place });
 });
