@@ -12,5 +12,9 @@ router.get('/user/:uid', placeControllers.getPlaceByUser);
 
 router.post('/', placeControllers.createPlace);
 
+router.patch('/:pid', placeControllers.updatePlace);
+
+router.delete('/:pid', placeControllers.deletePlace);
+
 // and export with CJS module export
 module.exports = router;

@@ -62,7 +62,29 @@ const createPlace = (req, res, next) => {
   res.status(200).json({ place: createdPlace });
 };
 
+// not "updatePlaceById" since we don't have any other way of updating
+const updatePlace = (req, res, next) => {
+  // only need these for updating
+  const { title, description } = req.body;
+  // By convention, you get id of the object in request param, and other data in body
+  const placeId = req.params.pid;
+  // find returns pointer to the object inside array
+  // so we need to copy the properties into new object and update them
+  const updatedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
+  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+  updatedPlace.title = title;
+  updatedPlace.description = description;
+
+  DUMMY_PLACES[placeIndex] = updatedPlace;
+
+  res.status(200).json({ place: updatedPlace });
+};
+
+const deletePlace = (req, res, next) => {};
+
 // these exports are merged into single object
 exports.getPlaceById = getPlaceById;
 exports.getPlaceByUser = getPlaceByUser;
 exports.createPlace = createPlace;
+exports.updatePlace = updatePlace;
+exports.deletePlace = deletePlace;
