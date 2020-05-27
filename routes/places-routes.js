@@ -1,4 +1,5 @@
 const express = require('express'); // have to require express in every file that uses it
+const { check } = require('express-validator');
 
 const placeControllers = require('../controllers/places-controllers');
 
@@ -10,9 +11,28 @@ router.get('/:pid', placeControllers.getPlaceById);
 // /api/places/user will be matched by the above route
 router.get('/user/:uid', placeControllers.getPlacesByUserId);
 
-router.post('/', placeControllers.createPlace);
+// validate form entries for request with body
+router.post(
+  '/',
+  // register validator
+  [
+    check('title').not().isEmpty(),
+    check('description').isLength({ min: 5 }),
+    check('address').not().isEmpty(),
+    // we're not checking coordinates (we'll get coordinates from Maps API)
+  ],
+  placeControllers.createPlace
+);
 
-router.patch('/:pid', placeControllers.updatePlace);
+router.patch(
+  '/:pid',
+  [
+    check('title').not().isEmpty(),
+    check('description').isLength({ min: 5 }),
+    // we're not checking coordinates (we'll get coordinates from Maps API)
+  ],
+  placeControllers.updatePlace
+);
 
 router.delete('/:pid', placeControllers.deletePlace);
 
