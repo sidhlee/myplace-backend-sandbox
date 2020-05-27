@@ -72,6 +72,12 @@ const createPlace = (req, res) => {
 
 // not "updatePlaceById" since we don't have any other way of updating
 const updatePlace = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    throw new HttpError('Invalid inputs passed, please check your data', 422);
+  }
+
   // only need these for updating
   const { title, description } = req.body;
   // By convention, you get id of the object in request param, and other data in body
