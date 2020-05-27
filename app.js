@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use('/api/places', placesRoutes); // routes are added at the given path
 
 // Handle unsupported routes (after all the routes and before the error handler)
-app.use((req, res, next) => {
+app.use(() => {
   const error = new HttpError('Could not find the requested page', 404);
   throw error;
 });
@@ -27,10 +27,12 @@ app.use((err, req, res, next) => {
     return next(err);
   }
   // use error's status code or fall back to 500
-  res
-    .status(err.code || 500)
-    // use error's message and provide fallback
-    .json({ message: err.message || 'An unknown error occurred!' });
+  return (
+    res
+      .status(err.code || 500)
+      // use error's message and provide fallback
+      .json({ message: err.message || 'An unknown error occurred!' })
+  );
 });
 
 // start server
