@@ -3,6 +3,7 @@ const { v4: uuid } = require('uuid');
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
+const getCoordsForAddress = require('../utils/location');
 
 let DUMMY_PLACES = [
   {
@@ -47,27 +48,39 @@ const getPlacesByUserId = (req, res, next) => {
   return res.json({ places });
 };
 
-const createPlace = (req, res) => {
+const createPlace = async (req, res, next) => {
   // peek req and return errors object
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
-    throw new HttpError('Invalid inputs passed, please check your data', 422);
+    // you MUST send the errors in next() when working with Promise
+    // throw new HttpError('Invalid inputs passed, please check your data', 422);
+    return next(
+      new HttpError('Invalid inputs passed, please check your data', 422)
+    );
   }
 
-  const { title, description, coordinates, address, creator } = req.body;
-  const createdPlace = {
-    id: uuid(),
-    title,
-    description,
-    location: coordinates,
-    address,
-    creator,
-  };
+  const { title, description, address, creator } = req.body;
 
-  DUMMY_PLACES.push(createdPlace); // unshift if you want to prepend it
+  try {
+    // returns Promise (makes API call to google geocoding)
+    const coordinates = await getCoordsForAddress(address);
+    const createdPlace = {
+      id: uuid(),
+      title,
+      description,
+      location: coordinates,
+      address,
+      creator,
+    };
 
-  res.status(200).json({ place: createdPlace });
+    DUMMY_PLACES.push(createdPlace); // unshift if you want to prepend it
+
+    res.status(200).json({ place: createdPlace });
+  } catch (err) {
+    // if caught an error, pass to error handler and break out of function
+    return next(err);
+  }
 };
 
 // not "updatePlaceById" since we don't have any other way of updating
