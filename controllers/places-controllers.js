@@ -31,18 +31,18 @@ const getPlaceById = (req, res) => {
 };
 
 // Add your callbacks at the specified routes(/api/places)
-const getPlaceByUser = (req, res, next) => {
+const getPlacesByUserId = (req, res, next) => {
   const userId = req.params.uid;
 
-  const place = DUMMY_PLACES.find((p) => p.creator === userId);
+  const places = DUMMY_PLACES.filter((p) => p.creator === userId);
 
-  if (!place) {
+  if (!places || places.length === 0) {
     // return to break (not that we need the returned value)
     // async callback must pass error to the next!
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
 
-  return res.json({ place });
+  return res.json({ places });
 };
 
 const createPlace = (req, res) => {
@@ -96,7 +96,7 @@ const deletePlace = (req, res, next) => {
 
 // these exports are merged into single object
 exports.getPlaceById = getPlaceById;
-exports.getPlaceByUser = getPlaceByUser;
+exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;
 exports.updatePlace = updatePlace;
 exports.deletePlace = deletePlace;

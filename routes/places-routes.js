@@ -8,7 +8,7 @@ router.get('/:pid', placeControllers.getPlaceById);
 
 // order of the routes matters.
 // /api/places/user will be matched by the above route
-router.get('/user/:uid', placeControllers.getPlaceByUser);
+router.get('/user/:uid', placeControllers.getPlacesByUserId);
 
 router.post('/', placeControllers.createPlace);
 

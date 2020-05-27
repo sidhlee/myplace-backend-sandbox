@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const placesRoutes = require('./routes/places-routes');
+const usersRoutes = require('./routes/users-routes');
 const HttpError = require('./models/http-error');
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(bodyParser.json());
 // use your routes here
 // If no path is given, all route paths will be "exact"
 app.use('/api/places', placesRoutes); // routes are added at the given path
+app.use('/api/users', usersRoutes);
 
 // Handle unsupported routes (after all the routes and before the error handler)
 app.use(() => {

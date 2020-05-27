@@ -14,13 +14,15 @@
     "ecmaVersion": 11
   },
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": true,
     "no-unused-vars": "warn",
+    "semi": "off",
     "no-console": "off",
     "func-names": "off",
     "no-process-exit": "off",
     "object-shorthand": "off",
     "class-methods-use-this": "off",
-    "object-curly-newline": "off"
+    "object-curly-newline": "off",
+    "object-curly-spacing": "off"
   }
 }
