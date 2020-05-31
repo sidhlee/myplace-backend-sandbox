@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6 },
   image: { type: String, required: true },
-  // populating places field with documents with matching ObjectId from places collection
+  // Ref Set the model that this path refers to.
+  // This is the option that populate looks at to determine the foreign collection it should query.
   places: [{ type: mongoose.ObjectId, required: true, ref: 'Place' }],
 });
 

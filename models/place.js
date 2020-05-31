@@ -9,7 +9,8 @@ const placeSchema = new mongoose.Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
   },
-  // populates creator field with the document with matching ObjectId from 'users' collection
+  // Ref Set the model that this path refers to.
+  // This is the option that populate looks at to determine the foreign collection it should query.
   creator: { type: mongoose.ObjectId, required: true, ref: 'User' },
 });
 
