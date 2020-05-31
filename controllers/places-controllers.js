@@ -175,7 +175,11 @@ const updatePlace = async (req, res, next) => {
 const deletePlace = async (req, res, next) => {
   let deletingPlace;
   try {
-    deletingPlace = await Place.findById(req.params.pid);
+    // populate() automatically replaces the specified paths in the document
+    // with the pointer to document(s) from other collections using the specified ref(ObjectId)
+    // so that you can directly update the source document from the populated document.
+    // To use populate, collections should be in relation by "ref".
+    deletingPlace = await Place.findById(req.params.pid).populate('creator');
   } catch (err) {
     return next(new HttpError('Error occurred while finding place'), 500);
   }
@@ -185,7 +189,14 @@ const deletePlace = async (req, res, next) => {
   }
 
   try {
-    await deletingPlace.remove();
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await deletingPlace.remove({ session: session });
+    // Now we can pull directly from Place document's creator field
+    deletingPlace.creator.places.pull(deletingPlace);
+    // ... and save it too.
+    await deletingPlace.creator.save({ session: session });
+    await session.commitTransaction();
   } catch (err) {
     return next(new HttpError('Error occurred while deleting place'), 500);
   }
