@@ -4,6 +4,7 @@ const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../utils/location');
+const Place = require('../models/place');
 
 let DUMMY_PLACES = [
   {
@@ -62,25 +63,32 @@ const createPlace = async (req, res, next) => {
 
   const { title, description, address, creator } = req.body;
 
+  let coordinates;
   try {
     // returns Promise (makes API call to google geocoding)
-    const coordinates = await getCoordsForAddress(address);
-    const createdPlace = {
-      id: uuid(),
-      title,
-      description,
-      location: coordinates,
-      address,
-      creator,
-    };
-
-    DUMMY_PLACES.push(createdPlace); // unshift if you want to prepend it
-
-    res.status(200).json({ place: createdPlace });
+    coordinates = await getCoordsForAddress(address);
   } catch (err) {
-    // if caught an error, pass to error handler and break out of function
     return next(err);
   }
+
+  // create new document from Place model
+  const createdPlace = new Place({
+    title,
+    description,
+    image: 'https://placem.at/places?w=1260&h=750&random=1',
+    address,
+    location: coordinates,
+    creator,
+  });
+
+  try {
+    await createdPlace.save();
+  } catch (err) {
+    const error = new HttpError('Creating place failed, please try again', 500);
+    return next(err);
+  }
+
+  res.status(200).json({ place: createdPlace });
 };
 
 // not "updatePlaceById" since we don't have any other way of updating
