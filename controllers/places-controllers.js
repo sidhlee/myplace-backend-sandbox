@@ -149,13 +149,25 @@ const updatePlace = async (req, res, next) => {
     .json({ place: updatingPlace.toObject({ getters: true }) });
 };
 
-const deletePlace = (req, res, next) => {
-  const deletingPlace = DUMMY_PLACES.find((p) => p.id === req.params.pid);
+const deletePlace = async (req, res, next) => {
+  let deletingPlace;
+  try {
+    deletingPlace = await Place.findById(req.params.pid);
+  } catch (err) {
+    return next(new HttpError('Error occurred while finding place'), 500);
+  }
+
   if (!deletingPlace) {
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
-  DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== req.params.pid);
-  return res.status(200).json({ message: 'Deleted places.' });
+
+  try {
+    await deletingPlace.remove();
+  } catch (err) {
+    return next(new HttpError('Error occurred while deleting place'), 500);
+  }
+
+  return res.status(200).json({ message: 'Deleted places' });
 };
 
 // these exports are merged into single object

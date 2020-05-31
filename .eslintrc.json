@@ -14,7 +14,7 @@
     "ecmaVersion": 11
   },
   "rules": {
-    "prettier/prettier": true,
+    "prettier/prettier": "error",
     "no-unused-vars": "warn",
     "semi": "off",
     "no-console": "off",
