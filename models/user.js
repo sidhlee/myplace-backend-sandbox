@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6 },
   image: { type: String, required: true },
-  // we'll replace this later with dynamic value from the db
-  places: { type: String, required: true },
+  // populating places field with documents with matching ObjectId from places collection
+  places: [{ type: mongoose.ObjectId, required: true, ref: 'Place' }],
 });
 
 // unique field only adds unique id to each email property of a user

@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user'); // import User model
+const Place = require('../models/place');
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -32,7 +33,7 @@ const signup = async (req, res, next) => {
     );
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let userWithGivenEmail;
   try {
@@ -54,7 +55,7 @@ const signup = async (req, res, next) => {
     email,
     image: 'https://placem.at/people/w=400&h=400',
     password, // we'll encrypt the password later
-    places,
+    places: [], // the empty initial value will be populated once we add a new place.
   });
 
   try {

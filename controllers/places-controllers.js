@@ -1,9 +1,11 @@
+const mongoose = require('mongoose');
 // import validation result from the validators we set before the controllers
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../utils/location');
 const Place = require('../models/place');
+const User = require('../models/user');
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
@@ -82,9 +84,45 @@ const createPlace = async (req, res, next) => {
     creator,
   });
 
+  let user;
   try {
-    await createdPlace.save();
+    user = await User.findById(creator);
   } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding user. Please try again',
+        500
+      )
+    );
+  }
+
+  if (!user) {
+    return next(
+      new HttpError('Could not find the given user. Please try again', 404)
+    );
+  }
+
+  console.log(user);
+
+  try {
+    // create new session
+    const session = await mongoose.startSession();
+    // start transaction
+    session.startTransaction();
+    // To execute an operation in a transaction, you need to pass the session as an option.
+    // In transaction, collections are not automatically created as usual
+    // So you have to manually create the collection before save documents
+    await createdPlace.save({ session: session });
+    // mongoose 'push' method knows to insert createdPlace's ObjectId into places
+    user.places.push(createdPlace);
+    await user.save({ session: session });
+    // commit transaction
+    await session.commitTransaction();
+  } catch (err) {
+    // if an error gets thrown during a session, all changes are rolled back automatically.
+    // errorCode 500 includes
+    // - db server down
+    // - db validation fails
     return next(new HttpError('Creating place failed, please try again', 500));
   }
 

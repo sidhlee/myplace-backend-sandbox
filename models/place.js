@@ -9,7 +9,8 @@ const placeSchema = new mongoose.Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
   },
-  creator: { type: String, required: true }, // will be replace with _id
+  // populates creator field with the document with matching ObjectId from 'users' collection
+  creator: { type: mongoose.ObjectId, required: true, ref: 'User' },
 });
 
 // 'places' collection will be created
