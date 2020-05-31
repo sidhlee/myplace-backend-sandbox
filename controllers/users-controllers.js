@@ -63,10 +63,18 @@ const signup = async (req, res, next) => {
     .json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const identifiedUser = DUMMY_USERS.find((u) => u.email === email);
+  let identifiedUser;
+  try {
+    identifiedUser = await User.findOne({ email: email });
+  } catch (err) {
+    return next(
+      new HttpError('Logging in failed, please try again later', 500)
+    );
+  }
+
   if (!identifiedUser || identifiedUser.password !== password) {
     return next(
       new HttpError('Could not identify user with the given credentials.', 401)
