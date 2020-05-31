@@ -30,16 +30,17 @@ const getPlaceById = async (req, res, next) => {
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
-  let places;
+  let userWithPlaces;
   try {
-    places = await Place.find({ creator: userId }); // pass query obj
+    // get access to the matching Place documents by ObjectId
+    userWithPlaces = await User.findById(userId).populate('places');
   } catch (err) {
     return next(
       new HttpError('Fetching places failed, please try again later', 500)
     );
   }
-
-  if (!places || places.length === 0) {
+  // now we can access places documents from userWithPlaces.places
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
     // return to break (not that we need the returned value)
     // async callback must pass error to the next!
     return next(new HttpError('Could not find a place for the given id'), 404);
@@ -47,7 +48,9 @@ const getPlacesByUserId = async (req, res, next) => {
 
   // map mongoose Query object into plain JS object with _id converted to string
   return res.json({
-    places: places.map((place) => place.toObject({ getters: true })),
+    places: userWithPlaces.places.map((place) =>
+      place.toObject({ getters: true })
+    ),
   });
 };
 
@@ -176,8 +179,8 @@ const deletePlace = async (req, res, next) => {
   let deletingPlace;
   try {
     // populate() automatically replaces the specified paths in the document
-    // with the pointer to document(s) from other collections using the specified ref(ObjectId)
-    // so that you can directly update the source document from the populated document.
+    // with the pointer to document(s) matching the specified ref(ObjectId) from other collections
+    // so that you can directly manipulate the source document from the populated document.
     // To use populate, collections should be in relation by "ref".
     deletingPlace = await Place.findById(req.params.pid).populate('creator');
   } catch (err) {
