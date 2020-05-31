@@ -21,17 +21,23 @@ let DUMMY_PLACES = [
   },
 ];
 
-const getPlaceById = (req, res) => {
+const getPlaceById = async (req, res) => {
   const placeId = req.params.pid;
 
-  const place = DUMMY_PLACES.find((p) => p.id === placeId);
+  let place;
+  try {
+    place = await Place.findById(placeId); // returns thenable Query obj
+  } catch (err) {
+    return next(new HttpError('ERROR: could not find a place', 500));
+  }
 
   if (!place) {
     // triggers error handler
     throw new HttpError('Could not find a place for the given id', 404);
   }
 
-  res.json({ place });
+  // { getters: true } converts ObjectId into a string in _id field
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
 // Add your callbacks at the specified routes(/api/places)
