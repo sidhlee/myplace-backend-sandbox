@@ -39,6 +39,7 @@ const getPlacesByUserId = async (req, res, next) => {
       new HttpError('Fetching places failed, please try again later', 500)
     );
   }
+
   // now we can access places documents from userWithPlaces.places
   if (!userWithPlaces || userWithPlaces.places.length === 0) {
     // return to break (not that we need the returned value)
