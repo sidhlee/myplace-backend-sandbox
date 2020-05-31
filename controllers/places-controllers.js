@@ -1,4 +1,3 @@
-const { v4: uuid } = require('uuid');
 // import validation result from the validators we set before the controllers
 const { validationResult } = require('express-validator');
 
@@ -6,22 +5,7 @@ const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../utils/location');
 const Place = require('../models/place');
 
-let DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Youido Park',
-    description: 'Beautiful park surrounded by sky scrapers in Youido, Seoul',
-    imageUrl: 'https://placem.at/places?w=1260&h=750&random=1',
-    address: '68 Yeouigongwon-ro, Yeoui-dong, Yeongdeungpo-gu, Seoul', // cspell: disable-line
-    location: {
-      lat: 37.524482,
-      lng: 126.919066,
-    },
-    creator: 'u1',
-  },
-];
-
-const getPlaceById = async (req, res) => {
+const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
 
   let place;
@@ -37,7 +21,7 @@ const getPlaceById = async (req, res) => {
   }
 
   // { getters: true } converts ObjectId into a string in _id field
-  res.json({ place: place.toObject({ getters: true }) });
+  return res.json({ place: place.toObject({ getters: true }) });
 };
 
 // Add your callbacks at the specified routes(/api/places)
@@ -66,6 +50,8 @@ const getPlacesByUserId = async (req, res, next) => {
 };
 
 const createPlace = async (req, res, next) => {
+  const errors = validationResult(req);
+
   // peek req and return errors object
   if (!errors.isEmpty()) {
     console.log(errors);
@@ -99,11 +85,10 @@ const createPlace = async (req, res, next) => {
   try {
     await createdPlace.save();
   } catch (err) {
-    const error = new HttpError('Creating place failed, please try again', 500);
-    return next(err);
+    return next(new HttpError('Creating place failed, please try again', 500));
   }
 
-  res.status(200).json({ place: createdPlace });
+  return res.status(200).json({ place: createdPlace });
 };
 
 // not "updatePlaceById" since we don't have any other way of updating

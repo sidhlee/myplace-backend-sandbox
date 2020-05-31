@@ -1,7 +1,7 @@
-const { v4: uuid } = require('uuid');
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
+const User = require('../models/user');
 
 const DUMMY_USERS = [
   {
@@ -16,30 +16,51 @@ const getUsers = (req, res, next) => {
   res.json({ users: DUMMY_USERS });
 };
 
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
-    throw new HttpError('Invalid inputs passed, please check your data', 422);
+    // throw doesn't get handled in async function
+    // throw new HttpError('Invalid inputs passed, please check your data', 422);
+    return next(
+      new HttpError('Invalid inputs passed, please check your data', 422)
+    );
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, password, places } = req.body;
 
-  const userWithGivenEmail = DUMMY_USERS.find((u) => u.email === email);
+  let userWithGivenEmail;
+  try {
+    userWithGivenEmail = await User.findOne({ email: email });
+  } catch (err) {
+    return next(
+      new HttpError('Signing up failed, please try again later', 500)
+    );
+  }
+
   if (userWithGivenEmail) {
-    throw new HttpError('Could not create user, email already exist.', 422);
+    return next(
+      new HttpError('Could not create user, email already exist.', 422)
+    );
   }
 
-  const createdUser = {
-    id: uuid(),
+  const createdUser = new User({
     name,
     email,
-    password,
-  };
+    image: 'https://placem.at/people/w=400&h=400',
+    password, // we'll encrypt the password later
+    places,
+  });
 
-  DUMMY_USERS.push(createdUser);
+  try {
+    await createdUser.save();
+  } catch (err) {
+    return next(new HttpError('Signing up failed, please try again', 500));
+  }
 
-  res.status(201).json({ user: createdUser });
+  return res
+    .status(201)
+    .json({ user: createdUser.toObject({ getters: true }) });
 };
 
 const login = (req, res, next) => {
@@ -47,13 +68,12 @@ const login = (req, res, next) => {
 
   const identifiedUser = DUMMY_USERS.find((u) => u.email === email);
   if (!identifiedUser || identifiedUser.password !== password) {
-    throw new HttpError(
-      'Could not identify user with the given credentials.',
-      401
+    return next(
+      new HttpError('Could not identify user with the given credentials.', 401)
     );
   }
 
-  res.status(200).json({ message: 'Logged in!' });
+  return res.status(200).json({ message: 'Logged in!' });
 };
 
 exports.getUsers = getUsers;
