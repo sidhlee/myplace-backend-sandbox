@@ -58,7 +58,7 @@ const getPlacesByUserId = async (req, res, next) => {
     // async callback must pass error to the next!
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
-  console.log(places);
+
   // map mongoose Query object into plain JS object with _id converted to string
   return res.json({
     places: places.map((place) => place.toObject({ getters: true })),
@@ -107,7 +107,7 @@ const createPlace = async (req, res, next) => {
 };
 
 // not "updatePlaceById" since we don't have any other way of updating
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
@@ -119,21 +119,34 @@ const updatePlace = (req, res, next) => {
   // By convention, you get id of the object in request param, and other data in body
   const placeId = req.params.pid;
 
-  const updatingPlace = DUMMY_PLACES.find((p) => p.id === placeId);
+  let updatingPlace;
+  try {
+    updatingPlace = await Place.findById(placeId);
+    console.log(updatingPlace);
+  } catch (err) {
+    // if id is in the wrong format, Error gets thrown and caught here
+    return next(new HttpError('Error occurred while finding place', 500));
+  }
+
+  // if id is in the correct format, but cannot find matching document
   if (!updatingPlace) {
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
 
-  // find returns pointer to the object inside array
-  // so we need to copy the properties into new object and update them
-  const newPlace = { ...updatingPlace };
-  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
-  newPlace.title = title;
-  newPlace.description = description;
+  // we can directly update on the returned Query object
+  updatingPlace.title = title;
+  updatingPlace.description = description;
 
-  DUMMY_PLACES[placeIndex] = newPlace;
+  try {
+    await updatingPlace.save();
+  } catch (err) {
+    return next(new HttpError('Error occurred while updating place', 500));
+  }
 
-  return res.status(200).json({ place: newPlace });
+  // Convert Query obj into plain object before sending back
+  return res
+    .status(200)
+    .json({ place: updatingPlace.toObject({ getters: true }) });
 };
 
 const deletePlace = (req, res, next) => {
