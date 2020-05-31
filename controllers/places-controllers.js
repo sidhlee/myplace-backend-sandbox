@@ -41,23 +41,32 @@ const getPlaceById = async (req, res) => {
 };
 
 // Add your callbacks at the specified routes(/api/places)
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
-  const places = DUMMY_PLACES.filter((p) => p.creator === userId);
+  let places;
+  try {
+    places = await Place.find({ creator: userId }); // pass query obj
+  } catch (err) {
+    return next(
+      new HttpError('Fetching places failed, please try again later', 500)
+    );
+  }
 
   if (!places || places.length === 0) {
     // return to break (not that we need the returned value)
     // async callback must pass error to the next!
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
-
-  return res.json({ places });
+  console.log(places);
+  // map mongoose Query object into plain JS object with _id converted to string
+  return res.json({
+    places: places.map((place) => place.toObject({ getters: true })),
+  });
 };
 
 const createPlace = async (req, res, next) => {
   // peek req and return errors object
-  const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
     // you MUST send the errors in next() when working with Promise
