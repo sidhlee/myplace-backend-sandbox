@@ -1,5 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const placesRoutes = require('./routes/places-routes');
 const usersRoutes = require('./routes/users-routes');
@@ -37,5 +39,16 @@ app.use((err, req, res, next) => {
   );
 });
 
-// start server
-app.listen(5000);
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('connected to db');
+    // start server
+    app.listen(5000, () => console.log('server listening to PORT 5000...'));
+  })
+  .catch((err) => {
+    console.log(err);
+  });
