@@ -1,19 +1,24 @@
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
-const User = require('../models/user');
+const User = require('../models/user'); // import User model
 
-const DUMMY_USERS = [
-  {
-    id: 'u1',
-    name: 'Sid',
-    email: 'test@test.com',
-    password: 'testers',
-  },
-];
-
-const getUsers = (req, res, next) => {
-  res.json({ users: DUMMY_USERS });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    // we could also set the projection as 'name email'
+    users = await User.find({}, '-password');
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An Error occurred while finding users. Please try again later',
+        500
+      )
+    );
+  }
+  return res.json({
+    users: users.map((user) => user.toObject({ getters: true })),
+  });
 };
 
 const signup = async (req, res, next) => {
