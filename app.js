@@ -11,6 +11,21 @@ const app = express();
 
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+  // allow req from browsers of any domain (including our app localhost:3000)
+  // this rule only applies to browser (Not to other apps like Postman)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Allow the following headers from the request sent from browsers
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    // Origin, X-Requested-With, Accept are set by the browser automatically
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  // sets which http methods are allowed on frontend
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+  next();
+});
+
 // use your routes here
 // If no path is given, all route paths will be "exact"
 app.use('/api/places', placesRoutes); // routes are added at the given path
