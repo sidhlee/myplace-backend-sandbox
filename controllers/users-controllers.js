@@ -52,7 +52,7 @@ const signup = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image: 'https://placem.at/people/w=400&h=400',
+    image: 'https://placem.at/people?w=400&h=400&random=1',
     password, // we'll encrypt the password later
     places: [], // the empty initial value will be populated once we add a new place.
   });
@@ -86,7 +86,10 @@ const login = async (req, res, next) => {
     );
   }
 
-  return res.status(200).json({ message: 'Logged in!' });
+  return res.status(200).json({
+    message: 'Logged in!',
+    user: identifiedUser.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;
