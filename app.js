@@ -1,6 +1,7 @@
 require('dotenv').config();
 // To delete the file on rollback
 const fs = require('fs');
+const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -13,6 +14,9 @@ const HttpError = require('./models/http-error');
 const app = express();
 
 app.use(bodyParser.json());
+
+// Any file requested at '/uploads/images/' will be statically served
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 app.use((req, res, next) => {
   // allow req from browsers of any domain (including our app localhost:3000)
