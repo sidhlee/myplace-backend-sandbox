@@ -2,6 +2,7 @@ const express = require('express'); // have to require express in every file tha
 const { check } = require('express-validator');
 
 const placeControllers = require('../controllers/places-controllers');
+const fileUpload = require('../middleware/file-upload');
 
 const router = express.Router(); // run express's router factory to create router
 
@@ -14,6 +15,7 @@ router.get('/user/:uid', placeControllers.getPlacesByUserId);
 // validate form entries for request with body
 router.post(
   '/',
+  fileUpload.single('image'),
   // register validator
   [
     check('title').not().isEmpty(),

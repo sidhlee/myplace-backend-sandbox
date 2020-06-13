@@ -82,7 +82,7 @@ const createPlace = async (req, res, next) => {
   const createdPlace = new Place({
     title,
     description,
-    image: 'https://placem.at/places?w=1260&h=750&random=1',
+    image: req.file.path, // path to the image written to the disk by fileUpload middleware
     address,
     location: coordinates,
     creator,
