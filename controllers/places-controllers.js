@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 // import validation result from the validators we set before the controllers
+
+const fs = require('fs');
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
@@ -192,6 +194,8 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
 
+  const imagePath = deletingPlace.image;
+
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -204,6 +208,11 @@ const deletePlace = async (req, res, next) => {
   } catch (err) {
     return next(new HttpError('Error occurred while deleting place'), 500);
   }
+  // Delete the image file from the disk when deleting a place
+  // we don't await for deleting images from the disk!
+  fs.unlink(imagePath, (error) => {
+    console.log(error);
+  });
 
   return res.status(200).json({ message: 'Deleted places' });
 };
