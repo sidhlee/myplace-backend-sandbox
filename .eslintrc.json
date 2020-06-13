@@ -28,6 +28,7 @@
     "object-shorthand": "off",
     "class-methods-use-this": "off",
     "object-curly-newline": "off",
-    "object-curly-spacing": "off"
+    "object-curly-spacing": "off",
+    "prefer-template": "off"
   }
 }
