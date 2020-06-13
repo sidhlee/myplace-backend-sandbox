@@ -1,4 +1,7 @@
 require('dotenv').config();
+// To delete the file on rollback
+const fs = require('fs');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -39,6 +42,18 @@ app.use(() => {
 
 // when you give 4 parameters to `use`, express knows it is an error handler
 app.use((err, req, res, next) => {
+  // multer adds file property to the req if the file is contained in the body
+  if (req.file) {
+    // asynchronously removes a file or symbolic link
+    fs.unlink(req.file.path, (error) => {
+      // this callback runs with/without error
+
+      // if an error occurs during deletion, we'll just log the error
+      // We can easily delete the file manually
+      console.log('unlink error: ', error);
+    });
+  }
+
   // this will run if any preceding middleware throws an error
 
   // res already sent. pass err to next middleware
