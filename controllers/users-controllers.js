@@ -82,6 +82,7 @@ const login = async (req, res, next) => {
 
   let identifiedUser;
   try {
+    // get user from db
     identifiedUser = await User.findOne({ email: email });
   } catch (err) {
     return next(
@@ -89,12 +90,29 @@ const login = async (req, res, next) => {
     );
   }
 
-  if (!identifiedUser || identifiedUser.password !== password) {
+  if (!identifiedUser) {
     return next(
       new HttpError('Could not identify user with the given credentials.', 401)
     );
   }
 
+  // If user exists in db, compare pw with hashed one.
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, identifiedUser.password);
+  } catch (err) {
+    // server error
+    return next(new HttpError('Could not log in. Please try again later', 500));
+  }
+
+  // Throw for invalid pw
+  if (!isValidPassword) {
+    return next(
+      new HttpError('Could not log in. Please check your password', 401)
+    );
+  }
+
+  // All pass. Log user in.
   return res.status(200).json({
     message: 'Logged in!',
     user: identifiedUser.toObject({ getters: true }),
