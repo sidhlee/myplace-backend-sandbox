@@ -2,6 +2,10 @@ const jwt = require('jsonwebtoken');
 const HttpError = require('../models/http-error');
 
 module.exports = (req, res, next) => {
+  // allow pre-flight request to continue without checking for token
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
   // token can be considered as a metadata attached to the request
   try {
     const token = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
