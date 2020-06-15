@@ -3,6 +3,7 @@ const { check } = require('express-validator');
 
 const placeControllers = require('../controllers/places-controllers');
 const fileUpload = require('../middleware/file-upload');
+const checkAuth = require('../middleware/check-auth');
 
 const router = express.Router(); // run express's router factory to create router
 
@@ -11,6 +12,9 @@ router.get('/:pid', placeControllers.getPlaceById);
 // order of the routes matters.
 // /api/places/user will be matched by the above route
 router.get('/user/:uid', placeControllers.getPlacesByUserId);
+
+// middleware added here only affects the following routes.
+router.use(checkAuth); // don't need to run it. (it's a function, not a factory)
 
 // validate form entries for request with body
 router.post(
