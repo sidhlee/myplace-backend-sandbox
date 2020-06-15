@@ -1,5 +1,7 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 const HttpError = require('../models/http-error');
 const User = require('../models/user'); // import User model
 
@@ -72,9 +74,24 @@ const signup = async (req, res, next) => {
     return next(new HttpError('Signing up failed, please try again', 500));
   }
 
-  return res
-    .status(201)
-    .json({ user: createdUser.toObject({ getters: true }) });
+  let token;
+  // payload can be anything that can identify the user with
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email }, // payload
+      'secret_key_that_only_the_server_knows', // secret
+      { expiresIn: '1h' } // options - good practice to expire the token in one hour
+    );
+  } catch (err) {
+    return next(new HttpError('Signing up failed, please try again', 500));
+  }
+
+  return (
+    res
+      .status(201)
+      // we decided to return these to the client when signed up
+      .json({ userId: createdUser.id, email: createdUser.email, token })
+  );
 };
 
 const login = async (req, res, next) => {
@@ -112,10 +129,24 @@ const login = async (req, res, next) => {
     );
   }
 
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: identifiedUser.id, email: identifiedUser.email }, // payload
+      'secret_key_that_only_the_server_knows', // secret
+      { expiresIn: '1h' } // options - good practice to expire the token in one hour
+    );
+  } catch (err) {
+    return next(new HttpError('Logging in failed, please try again', 500));
+  }
+
   // All pass. Log user in.
   return res.status(200).json({
-    message: 'Logged in!',
-    user: identifiedUser.toObject({ getters: true }),
+    userId: identifiedUser.id,
+    email: identifiedUser.email,
+    token,
+    // client will attach this token to the future requests to
+    // access the routes that require authentication
   });
 };
 
