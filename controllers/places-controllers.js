@@ -162,6 +162,13 @@ const updatePlace = async (req, res, next) => {
     return next(new HttpError('Could not find a place for the given id'), 404);
   }
 
+  // place is found. now authorize the request with userId
+  // updatingPlace.creator has mongoose ObjectId
+  if (updatingPlace.creator.toString() !== req.userData.userId) {
+    // 403 - Forbidden(Unauthorized) |  401 - Unauthorized (Unauthenticated)
+    return next(new HttpError('You are not allowed to edit this place.', 403));
+  }
+
   // we can directly update on the returned Query object
   updatingPlace.title = title;
   updatingPlace.description = description;

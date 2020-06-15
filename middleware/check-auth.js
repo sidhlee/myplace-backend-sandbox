@@ -16,9 +16,10 @@ module.exports = (req, res, next) => {
     // verify returns the original object that was encoded into jwt
     const decodedToken = jwt.verify(
       token,
+      // this private key will invalidate a tempered token
       'secret_key_that_only_the_server_knows'
     );
-    // add decoded data into the request
+    // add decoded userId into the request
     req.userData = { userId: decodedToken.userId };
     return next();
   } catch (err) {
