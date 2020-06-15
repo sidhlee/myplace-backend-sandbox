@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-
+const bcrypt = require('bcryptjs');
 const HttpError = require('../models/http-error');
 const User = require('../models/user'); // import User model
 
@@ -48,6 +48,13 @@ const signup = async (req, res, next) => {
       new HttpError('Could not create user, email already exist.', 422)
     );
   }
+  let hashedPassword;
+  // arg2 - salt rounds
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    return next(new HttpError('Could not create user, please try again', 500));
+  }
 
   const createdUser = new User({
     name,
@@ -55,7 +62,7 @@ const signup = async (req, res, next) => {
     // req.file/path holds the provided path in destination field(uploads/images/fileName)
     // We can prepend the address before path in the frontend
     image: /* 'http://localhost:5000/' + */ req.file.path,
-    password, // we'll encrypt the password later
+    password: hashedPassword,
     places: [], // the empty initial value will be populated once we add a new place.
   });
 
