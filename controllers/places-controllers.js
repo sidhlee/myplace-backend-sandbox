@@ -151,7 +151,6 @@ const updatePlace = async (req, res, next) => {
   let updatingPlace;
   try {
     updatingPlace = await Place.findById(placeId);
-    console.log(updatingPlace);
   } catch (err) {
     // if id is in the wrong format, Error gets thrown and caught here
     return next(new HttpError('Error occurred while finding place', 500));
@@ -188,10 +187,10 @@ const updatePlace = async (req, res, next) => {
 const deletePlace = async (req, res, next) => {
   let deletingPlace;
   try {
-    // populate() automatically replaces the specified paths in the document
+    // populate() automatically replaces the specified field in the document
     // with the pointer to document(s) matching the specified ref(ObjectId) from other collections
     // so that you can directly manipulate the source document from the populated document.
-    // To use populate, collections should be in relation by "ref".
+    // To use populate, target collections should be referenced by "ref".
     deletingPlace = await Place.findById(req.params.pid).populate('creator');
   } catch (err) {
     return next(new HttpError('Error occurred while finding place'), 500);
@@ -199,6 +198,13 @@ const deletePlace = async (req, res, next) => {
 
   if (!deletingPlace) {
     return next(new HttpError('Could not find a place for the given id'), 404);
+  }
+
+  // deletingPlace.creator.id is a getter that returns a string (no need for toString())
+  if (deletingPlace.creator.id !== req.userData.userId) {
+    return next(
+      new HttpError('You are not allowed to delete this place.', 403)
+    );
   }
 
   const imagePath = deletingPlace.image;
