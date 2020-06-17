@@ -9,6 +9,8 @@ const getUsers = async (req, res, next) => {
   let users;
   try {
     // we could also set the projection as 'name email'
+    // Always ensure that you don't send response with full user object
+    // which might include password and other sensitive information
     users = await User.find({}, '-password');
   } catch (err) {
     return next(

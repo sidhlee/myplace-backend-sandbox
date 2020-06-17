@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
       // this private key will invalidate a tempered token
       'secret_key_that_only_the_server_knows'
     );
-    // add decoded userId into the request
+    // extract userId from de-coded token and add it to the request
     req.userData = { userId: decodedToken.userId };
     return next();
   } catch (err) {

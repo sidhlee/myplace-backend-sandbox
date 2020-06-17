@@ -30,6 +30,8 @@ const getPlaceById = async (req, res, next) => {
 
 // Add your callbacks at the specified routes(/api/places)
 const getPlacesByUserId = async (req, res, next) => {
+  // we still need to get the userId from the param, not token,
+  // because user can get other users places
   const userId = req.params.uid;
 
   let userWithPlaces;
@@ -70,7 +72,10 @@ const createPlace = async (req, res, next) => {
     );
   }
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
+  // It's more secure and safe to get the userId from the token
+  // (Only authenticated user can create place anyway.)
+  const creator = req.userData.userId; // userId extracted from the token
 
   let coordinates;
   try {
@@ -118,10 +123,14 @@ const createPlace = async (req, res, next) => {
     // To execute an operation in a transaction, you need to pass the session as an option.
     // In transaction, collections are not automatically created as usual
     // So you have to manually create the collection before save documents
-    await createdPlace.save({ session: session });
+    await createdPlace.save({
+      session: session,
+    });
     // mongoose 'push' method knows to insert createdPlace's ObjectId into places
     user.places.push(createdPlace);
-    await user.save({ session: session });
+    await user.save({
+      session: session,
+    });
     // commit transaction
     await session.commitTransaction();
   } catch (err) {
@@ -132,7 +141,9 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError('Creating place failed, please try again', 500));
   }
 
-  return res.status(200).json({ place: createdPlace });
+  return res.status(200).json({
+    place: createdPlace,
+  });
 };
 
 // not "updatePlaceById" since we don't have any other way of updating
