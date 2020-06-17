@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
     const decodedToken = jwt.verify(
       token,
       // this private key will invalidate a tempered token
-      'secret_key_that_only_the_server_knows'
+      process.env.JWT_KEY
     );
     // extract userId from de-coded token and add it to the request
     req.userData = { userId: decodedToken.userId };

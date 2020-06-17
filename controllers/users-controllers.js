@@ -81,7 +81,7 @@ const signup = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email }, // payload
-      'secret_key_that_only_the_server_knows', // secret
+      process.env.JWT_KEY, // secret
       { expiresIn: '1h' } // options - good practice to expire the token in one hour
     );
   } catch (err) {
@@ -135,7 +135,7 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: identifiedUser.id, email: identifiedUser.email }, // payload
-      'secret_key_that_only_the_server_knows', // secret
+      process.env.JWT_KEY, // secret
       { expiresIn: '1h' } // options - good practice to expire the token in one hour
     );
   } catch (err) {

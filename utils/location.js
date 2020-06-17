@@ -12,12 +12,12 @@ async function getCoordsForAddress(address) {
   const response = await axios.get(
     `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
       address
-    )}&key=${process.env.API_KEY}`
+    )}&key=${process.env.GOOGLE_API_KEY}`
   );
 
   // check docs for data shape
   // https://developers.google.com/maps/documentation/geocoding/start
-  const data = response.data;
+  const { data } = response;
 
   if (!data || data.status === 'ZERO_RESULTS') {
     const error = new HttpError(
