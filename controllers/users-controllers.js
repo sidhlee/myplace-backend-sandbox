@@ -1,5 +1,9 @@
-const express = require('express');
+const getUsers = () => {};
+const signup = () => {};
+const login = () => {};
 
-const router = express.Router();
-
-module.exports = router;
+module.exports = {
+  getUsers,
+  signup,
+  login,
+};

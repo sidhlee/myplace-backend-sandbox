@@ -9,6 +9,7 @@
     "ecmaVersion": 11
   },
   "rules": {
-    "no-console": "off"
+    "no-console": "off",
+    "no-unused-vars": "warn"
   }
 }

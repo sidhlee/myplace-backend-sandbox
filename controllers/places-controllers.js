@@ -1,5 +1,14 @@
-const express = require('express');
+const getPlaceById = (req, res, next) => {};
 
-const router = express.Router();
+const getPlacesByUserId = (req, res, next) => {};
 
-module.exports = router;
+const createPlace = (req, res, next) => {};
+
+const updatePlace = (req, res, next) => {};
+
+module.exports = {
+  getPlaceById,
+  getPlacesByUserId,
+  createPlace,
+  updatePlace,
+};
