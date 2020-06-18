@@ -19,6 +19,17 @@ app.use(() => {
   throw new HttpError(`The requested page cannot be found.`, 404);
 });
 
+app.use((error, req, res, next) => {
+  if (res.headerSent) {
+    // if any error is thrown after the response is sent,
+    // we'll just delegate the error to the next middleware
+    return next(error);
+  }
+  return res
+    .status(error.code || 500)
+    .json({ message: error.message || 'An unknown error occurred' });
+});
+
 mongoose.connect(
   process.env.MONGO_URI,
   {
