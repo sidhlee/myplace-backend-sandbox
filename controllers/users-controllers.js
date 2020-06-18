@@ -60,12 +60,14 @@ const signup = async (req, res, next) => {
     return next(new HttpError('Could not create user, please try again', 500));
   }
 
+  console.log(req.file);
+
   const createdUser = new User({
     name,
     email,
     // req.file/path holds the provided path in destination field(uploads/images/fileName)
     // We can prepend the address before path in the frontend
-    image: /* 'http://localhost:5000/' + */ req.file.path,
+    image: /* 'http://localhost:5000/' + */ req.file.key,
     password: hashedPassword,
     places: [], // the empty initial value will be populated once we add a new place.
   });
@@ -73,6 +75,7 @@ const signup = async (req, res, next) => {
   try {
     await createdUser.save();
   } catch (err) {
+    console.log(err, err.stack);
     return next(new HttpError('Signing up failed, please try again', 500));
   }
 
@@ -85,6 +88,7 @@ const signup = async (req, res, next) => {
       { expiresIn: '1h' } // options - good practice to expire the token in one hour
     );
   } catch (err) {
+    console.log(err, err.stack);
     return next(new HttpError('Signing up failed, please try again', 500));
   }
 

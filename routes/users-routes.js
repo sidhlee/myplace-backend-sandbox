@@ -2,7 +2,7 @@ const express = require('express'); // have to require express in every file tha
 const { check } = require('express-validator');
 
 const usersControllers = require('../controllers/users-controllers');
-const fileUpload = require('../middleware/file-upload');
+const { s3Upload } = require('../middleware/file-upload');
 
 const router = express.Router(); // run express's router factory to create router
 
@@ -12,7 +12,7 @@ router.post(
   '/signup',
   // Add multer middleware that retrieves a single file
   // 'image' is the name of the field that holds the image data in the body object
-  fileUpload.single('image'),
+  s3Upload.single('image'),
   // validation kicks in after the the middleware which stores the uploaded image file to the disk
   // So in case of error, we have to manually rollback the creation of the file
   [

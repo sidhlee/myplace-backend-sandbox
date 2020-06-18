@@ -1,6 +1,6 @@
 require('dotenv').config();
 // To delete the file on rollback
-const fs = require('fs');
+const aws = require('aws-sdk');
 const path = require('path');
 
 const express = require('express');
@@ -12,6 +12,7 @@ const usersRoutes = require('./routes/users-routes');
 const HttpError = require('./models/http-error');
 
 const app = express();
+const s3 = new aws.S3();
 
 app.use(bodyParser.json());
 
@@ -46,15 +47,38 @@ app.use(() => {
 
 // when you give 4 parameters to `use`, express knows it is an error handler
 app.use((err, req, res, next) => {
-  // multer adds file property to the req if the file is contained in the body
-  if (req.file) {
-    // asynchronously removes a file or symbolic link
-    fs.unlink(req.file.path, (error) => {
-      // this callback runs with/without error
+  /*
+  req.file => 
+  { 
+    fieldname: 'image',
+    originalname: 'user_placeholder.png',
+    encoding: '7bit',
+    mimetype: 'image/png',
+    size: 216568,
+    bucket: 'mern-myplace-uploads-images',
+    key: '1592479678674',
+    acl: 'private',
+    contentType: 'application/octet-stream',
+    contentDisposition: null,
+    storageClass: 'STANDARD',
+    serverSideEncryption: null,
+    metadata: { fieldName: 'image' },
+    location: 'https://mern-myplace-uploads-images.s3.amazonaws.com/1592479678674',
+    etag: '"4788048f319dc48101678d9e69f5077e"',
+    versionId: undefined }
+  */
 
-      // if an error occurs during deletion, we'll just log the error
-      // We can easily delete the file manually
-      console.log('unlink error: ', error);
+  if (req.file) {
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Delete: {
+        Objects: [{ Key: req.file.key }],
+      },
+    };
+    // Rollback the creation of file in s3 on error
+    s3.deleteObjects(params, (error, data) => {
+      if (error) console.log(error, error.stack);
+      else console.log(data);
     });
   }
 
@@ -69,7 +93,9 @@ app.use((err, req, res, next) => {
     res
       .status(err.code || 500)
       // use error's message and provide fallback
-      .json({ message: err.message || 'An unknown error occurred!' })
+      .json({
+        message: err.message || 'An unknown error occurred!',
+      })
   );
 });
 

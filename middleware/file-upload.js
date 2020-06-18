@@ -1,3 +1,5 @@
+const aws = require('aws-sdk');
+const multerS3 = require('multer-s3');
 const multer = require('multer');
 const { v1: uuid } = require('uuid');
 
@@ -35,4 +37,28 @@ const fileUpload = multer({
   },
 });
 
-module.exports = fileUpload;
+aws.config.update({
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  region: process.env.S3_BUCKET_REGION,
+});
+
+const s3 = new aws.S3();
+
+const s3Upload = multer({
+  limits: 500000,
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.S3_BUCKET_NAME,
+    acl: 'public-read',
+    metadata: (req, file, cb) => {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: (req, file, cb) => {
+      const fileName = Date.now().toString();
+      cb(null, fileName);
+    },
+  }),
+});
+
+module.exports = { fileUpload, s3Upload };

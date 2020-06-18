@@ -2,7 +2,7 @@ const express = require('express'); // have to require express in every file tha
 const { check } = require('express-validator');
 
 const placeControllers = require('../controllers/places-controllers');
-const fileUpload = require('../middleware/file-upload');
+const { s3Upload } = require('../middleware/file-upload');
 const checkAuth = require('../middleware/check-auth');
 
 const router = express.Router(); // run express's router factory to create router
@@ -19,7 +19,7 @@ router.use(checkAuth); // don't need to run it. (it's a function, not a factory)
 // validate form entries for request with body
 router.post(
   '/',
-  fileUpload.single('image'),
+  s3Upload.single('image'),
   // register validator
   [
     check('title').not().isEmpty(),

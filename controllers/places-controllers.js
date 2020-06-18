@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
 // import validation result from the validators we set before the controllers
 
-const fs = require('fs');
+const aws = require('aws-sdk');
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../utils/location');
 const Place = require('../models/place');
 const User = require('../models/user');
+
+const s3 = new aws.S3();
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
@@ -89,7 +91,7 @@ const createPlace = async (req, res, next) => {
   const createdPlace = new Place({
     title,
     description,
-    image: req.file.path, // path to the image written to the disk by fileUpload middleware
+    image: req.file.key, // object key in Amazon s3
     address,
     location: coordinates,
     creator,
@@ -112,8 +114,6 @@ const createPlace = async (req, res, next) => {
       new HttpError('Could not find the given user. Please try again', 404)
     );
   }
-
-  console.log(user);
 
   try {
     // create new session
@@ -218,7 +218,7 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
-  const imagePath = deletingPlace.image;
+  const imageKey = deletingPlace.image;
 
   try {
     const session = await mongoose.startSession();
@@ -229,14 +229,21 @@ const deletePlace = async (req, res, next) => {
     // ... and save it too.
     await deletingPlace.creator.save({ session: session });
     await session.commitTransaction();
+
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Delete: {
+        Objects: [{ Key: imageKey }],
+      },
+    };
+    // Rollback the creation of file in s3 on error
+    s3.deleteObjects(params, (error, data) => {
+      if (error) console.log(error, error.stack);
+      else console.log(data);
+    });
   } catch (err) {
     return next(new HttpError('Error occurred while deleting place'), 500);
   }
-  // Delete the image file from the disk when deleting a place
-  // we don't await for deleting images from the disk!
-  fs.unlink(imagePath, (error) => {
-    console.log(error);
-  });
 
   return res.status(200).json({ message: 'Deleted places' });
 };
