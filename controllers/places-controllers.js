@@ -187,8 +187,49 @@ const updatePlace = async (req, res, next) => {
 
 const deletePlace = async (req, res, next) => {
   // Find the place from db with the req.params.pid
+  const placeId = req.params.pid;
+  let place;
+  try {
+    place = Place.findById(placeId).populate('creator');
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding the place. Please try again',
+        500
+      )
+    );
+  }
+  if (!place) {
+    return next(
+      new HttpError('Could not find the place for the given id', 404)
+    );
+  }
   // Authorize that the deleting place is created by the authenticated user
+  if (place.creator.toString() !== req.userData.userId) {
+    return next(
+      new HttpError('You are not authorized to delete this place', 403)
+    );
+  }
   // Pull the place from user's places field and delete the place
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    place.creator.places.pull(place);
+    await place.creator.save({ session });
+    await place.remove({ session });
+    await session.commitTransaction();
+  } catch (err) {
+    return next(
+      new HttpError(
+        'Error occurred while deleting place. Please try again.',
+        500
+      )
+    );
+  }
+  // TODO: Delete the image file from the storage
+
+  // Send response
+  return res.status(200).json({ message: 'Place deleted' });
 };
 
 module.exports = {
