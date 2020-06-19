@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
@@ -20,6 +21,14 @@ const getUsers = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(
+      new HttpError('Invalid input values were passed. Please try again', 422)
+    );
+  }
+
   const { name, email, password } = req.body;
 
   // check if a user with the same email exists
