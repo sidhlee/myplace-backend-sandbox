@@ -1,4 +1,5 @@
 const Place = require('../models/place');
+const User = require('../models/user');
 const HttpError = require('../models/http-error');
 
 const getPlaceById = async (req, res, next) => {
@@ -25,9 +26,33 @@ const getPlaceById = async (req, res, next) => {
   return res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = (req, res, next) => {
-  // Find the user from db with req.params.uid
+const getPlacesByUserId = async (req, res, next) => {
+  // Find the user from db with req.params.uid and populate places field
+  const userId = req.params.uid;
+  let user;
+  try {
+    user = await User.findById(userId).populate('places');
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding user. Please try again',
+        500
+      )
+    );
+  }
+
+  if (!user) {
+    // we'll not create an error if the user has no place yet
+    // we can handle that case on the front end (ie. show a message)
+    return next(
+      new HttpError('Could not find the user with the given id', 404)
+    );
+  }
+
   // Send response with places
+  return res.status(200).json({
+    places: user.places.map((place) => place.toObject({ getters: true })),
+  });
 };
 
 const createPlace = async (req, res, next) => {
