@@ -31,14 +31,14 @@ app.use((error, req, res, next) => {
 });
 
 mongoose.connect(
-  process.env.MONGO_URI,
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-nfatn.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   },
   (err) => {
     if (err) console.log(err);
-    console.log('connected to db...');
+    console.log(`connected to db: ${process.env.DB_NAME}`);
     app.listen(process.env.PORT, () => {
       console.log(`listening to PORT ${process.env.PORT}`);
     });
