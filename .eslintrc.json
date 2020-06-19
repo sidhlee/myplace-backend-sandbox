@@ -9,7 +9,15 @@
     "ecmaVersion": 11
   },
   "rules": {
+    "prettier/prettier": "error",
     "no-console": "off",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "array-element-newline": [
+      "error",
+      {
+        "ArrayExpression": "consistent",
+        "ArrayPattern": { "multiline": true }
+      }
+    ]
   }
 }
