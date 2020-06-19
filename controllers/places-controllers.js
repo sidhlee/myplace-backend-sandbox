@@ -1,3 +1,5 @@
+const { validationResult } = require('express-validator');
+
 const Place = require('../models/place');
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
@@ -57,7 +59,15 @@ const getPlacesByUserId = async (req, res, next) => {
 
 const createPlace = async (req, res, next) => {
   // Validate the request payload
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(
+      new HttpError('Invalid input values were passed. Please try again', 422)
+    );
+  }
   // Get coordinates with Google geocoding API
+
   // Create a new Place mongoose document
   // Extract creator id from the token and find the user from db
   // Save the place and push the place into user's places field
