@@ -20,4 +20,4 @@ const getCoordsForAddress = async (address) => {
   return coords;
 };
 
-exports.module = { getCoordsForAddress };
+module.exports = { getCoordsForAddress };

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
 
 const Place = require('../models/place');
@@ -76,17 +77,58 @@ const createPlace = async (req, res, next) => {
     return next(err); // feeling lazy
   }
 
+  // Extract creator id from the token and find the user from db
+  const creator = req.userData.userId;
+  let user;
+  try {
+    user = await User.findById(creator);
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding user. Please try again',
+        500
+      )
+    );
+  }
+
+  if (!user) {
+    return next(
+      new HttpError('Could not find the user with the provided token', 422)
+    );
+  }
+
   // Create a new Place mongoose document
-   
   const newPlace = new Place({
     title,
     description,
-    image: `https://placem.at/places?w=800&random=${}`,
-    creator: req.userData.userId
-  })
-  // Extract creator id from the token and find the user from db
+    address,
+    // TODO: replace this with the url to the user-uploaded image
+    image: `https://placem.at/places?w=800&random=${req.userData.email}`,
+    creator,
+    location: coords,
+  });
+
   // Save the place and push the place into user's places field
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await newPlace.save({ session });
+    // mongoose push will insert the property that matches places' schema (ObjectId)
+    user.places.push(newPlace);
+    await user.save({ session });
+    await session.commitTransaction();
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError(
+        'An error occurred while saving the place. Please try again',
+        500
+      )
+    );
+  }
+
   // Send response
+  return res.status(201).json({ place: newPlace });
 };
 
 const updatePlace = async (req, res, next) => {

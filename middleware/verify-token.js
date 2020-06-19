@@ -19,7 +19,7 @@ const verifyToken = (req, res, next) => {
         401
       );
     }
-    const decodedToken = jwt.verify(token, process.env.KWT_KEY);
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
 
     // Attach decoded token to the request
     req.userData = { userId: decodedToken.userId };
