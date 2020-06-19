@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 const Place = require('../models/place');
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
+const { getCoordsForAddress } = require('../utils/location');
 
 const getPlaceById = async (req, res, next) => {
   // Find the place from db with req.params.pid
@@ -67,8 +68,22 @@ const createPlace = async (req, res, next) => {
     );
   }
   // Get coordinates with Google geocoding API
+  const { title, description, address } = req.body;
+  let coords;
+  try {
+    coords = await getCoordsForAddress(address);
+  } catch (err) {
+    return next(err); // feeling lazy
+  }
 
   // Create a new Place mongoose document
+   
+  const newPlace = new Place({
+    title,
+    description,
+    image: `https://placem.at/places?w=800&random=${}`,
+    creator: req.userData.userId
+  })
   // Extract creator id from the token and find the user from db
   // Save the place and push the place into user's places field
   // Send response
