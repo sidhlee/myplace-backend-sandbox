@@ -24,3 +24,10 @@ if (existingUser) {
   return next(new HttpError('Could not sign up. Email already exists.', 422));
 }
 ```
+
+- Don't forget to convert mongoose documents to regular JS objects when adding them to the response.
+
+```js
+// getters creates 'id' field where you can access string instead of ObjectId
+return res.status(200).json({ place: place.toObject({ getters: true }) });
+```

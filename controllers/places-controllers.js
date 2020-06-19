@@ -1,6 +1,28 @@
-const getPlaceById = (req, res, next) => {
+const Place = require('../models/place');
+const HttpError = require('../models/http-error');
+
+const getPlaceById = async (req, res, next) => {
   // Find the place from db with req.params.pid
+  const placeId = req.params.pid;
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding place. Please try again.',
+        500
+      )
+    );
+  }
+
+  if (!place) {
+    return next(
+      new HttpError('Could not find the place with the given id', 404)
+    );
+  }
   // Send response with place
+  return res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
 const getPlacesByUserId = (req, res, next) => {
@@ -8,7 +30,7 @@ const getPlacesByUserId = (req, res, next) => {
   // Send response with places
 };
 
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
   // Validate the request payload
   // Get coordinates with Google geocoding API
   // Create a new Place mongoose document
@@ -17,7 +39,7 @@ const createPlace = (req, res, next) => {
   // Send response
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   // Validate the request payload
   // Find the place from db with the req.params.pid
   // Authorize that the updating place is created by the authenticated user
@@ -25,7 +47,7 @@ const updatePlace = (req, res, next) => {
   // Send response
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   // Find the place from db with the req.params.pid
   // Authorize that the deleting place is created by the authenticated user
   // Pull the place from user's places field and delete the place
