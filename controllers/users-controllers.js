@@ -87,7 +87,7 @@ const signup = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while creating a new token. Please try again',
+        'An error occurred while creating access token. Please try again',
         500
       )
     );
@@ -99,7 +99,70 @@ const signup = async (req, res, next) => {
     .json({ userId: newUser.id, email: newUser.email, token });
 };
 
-const login = async () => {};
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // Find the user with provided email
+  let user;
+  try {
+    user = await User.findOne({ email });
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding the user. Please try again',
+        500
+      )
+    );
+  }
+  if (!user) {
+    return next(new HttpError('Please check your email and try again', 422));
+  }
+
+  // Validate the password
+  let isPasswordValid = false;
+  try {
+    isPasswordValid = await bcrypt.compare(password, user.password);
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while validating password. Please try again',
+        500
+      )
+    );
+  }
+  if (!isPasswordValid) {
+    return next(new HttpError('Please check your password and try again', 422));
+  }
+
+  // Create a token from user data
+  let token;
+  try {
+    token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+      },
+      process.env.JWT_KEY,
+      {
+        expiresIn: '1h',
+      }
+    );
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while creating access token. Please try again',
+        500
+      )
+    );
+  }
+
+  // Send response
+  return res.status(200).json({
+    userId: user.id,
+    email: user.email,
+    token,
+  });
+};
 
 module.exports = {
   getUsers,
