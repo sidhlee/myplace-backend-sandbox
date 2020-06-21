@@ -111,7 +111,7 @@ const signup = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  // Find the user with provided email
+  // Find the user from the database with provided email
   let user;
   try {
     user = await User.findOne({ email });
@@ -127,7 +127,7 @@ const login = async (req, res, next) => {
     return next(new HttpError('Please check your email and try again', 422));
   }
 
-  // Validate the password
+  // Validate the payload password against hashed password from the database
   let isPasswordValid = false;
   try {
     isPasswordValid = await bcrypt.compare(password, user.password);
@@ -143,7 +143,7 @@ const login = async (req, res, next) => {
     return next(new HttpError('Please check your password and try again', 422));
   }
 
-  // Create a token from user data
+  // Take user id & email from user and encode them into the token
   let token;
   try {
     token = jwt.sign(
@@ -165,7 +165,7 @@ const login = async (req, res, next) => {
     );
   }
 
-  // Send response
+  // Send response with user id, email, and token
   return res.status(200).json({
     userId: user.id,
     email: user.email,
