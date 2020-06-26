@@ -10,7 +10,9 @@ router.get('/:pid', placesControllers.getPlaceById);
 router.get('/user/:uid', placesControllers.getPlacesByUserId);
 
 // post, patch and delete needs userId from the token
-router.use(verifyToken);
+
+// TODO: commented out for dev
+// router.use(verifyToken);
 
 // If successful, userId and email fields are available at req.userData
 
