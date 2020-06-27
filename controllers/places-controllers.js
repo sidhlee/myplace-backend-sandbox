@@ -23,7 +23,7 @@ const getPlaceById = async (req, res, next) => {
 
   if (!place) {
     return next(
-      new HttpError('Could not find the place with the given id', 404)
+      new HttpError('Could not find the place with the given id.', 404)
     );
   }
   // Send response with place
@@ -39,7 +39,7 @@ const getPlacesByUserId = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while finding user. Please try again',
+        'An error occurred while finding user. Please try again.',
         500
       )
     );
@@ -49,7 +49,7 @@ const getPlacesByUserId = async (req, res, next) => {
     // we'll not create an error if the user has no place yet
     // we can handle that case on the front end (ie. show a message)
     return next(
-      new HttpError('Could not find the user with the given id', 404)
+      new HttpError('Could not find the user with the given id.', 404)
     );
   }
 
@@ -65,7 +65,7 @@ const createPlace = async (req, res, next) => {
   if (!errors.isEmpty()) {
     console.log(errors);
     return next(
-      new HttpError('Invalid input values were passed. Please try again', 422)
+      new HttpError('Invalid input values were passed. Please try again.', 422)
     );
   }
   // Get coordinates with Google geocoding API
@@ -85,7 +85,7 @@ const createPlace = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while finding user. Please try again',
+        'An error occurred while finding user. Please try again.',
         500
       )
     );
@@ -93,7 +93,7 @@ const createPlace = async (req, res, next) => {
 
   if (!user) {
     return next(
-      new HttpError('Could not find the user with the provided token', 422)
+      new HttpError('Could not find the user with the provided token.', 422)
     );
   }
 
@@ -121,7 +121,7 @@ const createPlace = async (req, res, next) => {
     console.log(err);
     return next(
       new HttpError(
-        'An error occurred while saving the place. Please try again',
+        'An error occurred while saving the place. Please try again.',
         500
       )
     );
@@ -137,7 +137,7 @@ const updatePlace = async (req, res, next) => {
   if (!errors.isEmpty()) {
     console.log(errors);
     return next(
-      new HttpError('Invalid input values were passed. Please try again', 422)
+      new HttpError('Invalid input values were passed. Please try again.', 422)
     );
   }
   // Find the place from db with the req.params.pid
@@ -148,14 +148,14 @@ const updatePlace = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while finding the place. Please try again',
+        'An error occurred while finding the place. Please try again.',
         500
       )
     );
   }
   if (!place) {
     return next(
-      new HttpError('Could not find the place with the given id', 404)
+      new HttpError('Could not find the place with the given id.', 404)
     );
   }
   // Authorize that the updating place is created by the authenticated user
@@ -163,7 +163,7 @@ const updatePlace = async (req, res, next) => {
   // place.creator has a type of ObjectId
   if (place.creator.toString() !== userId) {
     return next(
-      new HttpError('You are not authorized to edit this place', 403)
+      new HttpError('You are not authorized to edit this place.', 403)
     );
   }
   // Update the place and save
@@ -176,7 +176,7 @@ const updatePlace = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while updating place. Please try again',
+        'An error occurred while updating place. Please try again.',
         500
       )
     );
@@ -194,20 +194,20 @@ const deletePlace = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while finding the place. Please try again',
+        'An error occurred while finding the place. Please try again.',
         500
       )
     );
   }
   if (!place) {
     return next(
-      new HttpError('Could not find the place for the given id', 404)
+      new HttpError('Could not find the place for the given id.', 404)
     );
   }
   // Authorize that the deleting place is created by the authenticated user
   if (place.creator.toString() !== req.userData.userId) {
     return next(
-      new HttpError('You are not authorized to delete this place', 403)
+      new HttpError('You are not authorized to delete this place.', 403)
     );
   }
   // Pull the place from user's places field and delete the place
@@ -229,7 +229,7 @@ const deletePlace = async (req, res, next) => {
   // TODO: Delete the image file from the storage
 
   // Send response
-  return res.status(200).json({ message: 'Place deleted' });
+  return res.status(200).json({ message: 'Place deleted.' });
 };
 
 module.exports = {

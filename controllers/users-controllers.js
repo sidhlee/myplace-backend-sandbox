@@ -11,7 +11,7 @@ const getUsers = async (req, res, next) => {
     users = await User.find({}, '-password');
   } catch (err) {
     return next(
-      new HttpError('Could not find users. Please try again later', 500)
+      new HttpError('Could not find users. Please try again later.', 500)
     );
   }
 
@@ -55,7 +55,7 @@ const signup = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while hashing password. Please try again',
+        'An error occurred while hashing password. Please try again.',
         500
       )
     );
@@ -76,7 +76,7 @@ const signup = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while saving user to the database. Please try again',
+        'An error occurred while saving user to the database. Please try again.',
         500
       )
     );
@@ -96,7 +96,7 @@ const signup = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while creating access token. Please try again',
+        'An error occurred while creating access token. Please try again.',
         500
       )
     );
@@ -118,13 +118,13 @@ const login = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while finding the user. Please try again',
+        'An error occurred while finding the user. Please try again.',
         500
       )
     );
   }
   if (!user) {
-    return next(new HttpError('Please check your email and try again', 422));
+    return next(new HttpError('Please check your email and try again.', 422));
   }
 
   // Validate the payload password against hashed password from the database
@@ -134,13 +134,15 @@ const login = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while validating password. Please try again',
+        'An error occurred while validating password. Please try again.',
         500
       )
     );
   }
   if (!isPasswordValid) {
-    return next(new HttpError('Please check your password and try again', 422));
+    return next(
+      new HttpError('Please check your password and try again.', 422)
+    );
   }
 
   // Take user id & email from user and encode them into the token
@@ -159,7 +161,7 @@ const login = async (req, res, next) => {
   } catch (err) {
     return next(
       new HttpError(
-        'An error occurred while creating access token. Please try again',
+        'An error occurred while creating access token. Please try again.',
         500
       )
     );

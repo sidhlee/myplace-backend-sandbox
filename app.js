@@ -16,6 +16,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
     'Access-Control-Allow-Headers',
+    // Origin, X-Requested-With, and Accept are set by the browser
     'Origin, X-Requested-With, Accept, Content-Type, Authorization'
   );
   next();
