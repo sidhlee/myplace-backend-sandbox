@@ -69,7 +69,7 @@ const createPlace = async (req, res, next) => {
     );
   }
   // Get coordinates with Google geocoding API
-  const { title, description, address } = req.body;
+  const { title, description, address, creator } = req.body;
   let coords;
   try {
     coords = await getCoordsForAddress(address);
@@ -78,7 +78,7 @@ const createPlace = async (req, res, next) => {
   }
 
   // Extract creator id from the token and find the user from db
-  const creator = req.userData.userId;
+  // const creator = req.userData.userId;
   let user;
   try {
     user = await User.findById(creator);
@@ -103,7 +103,7 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     // TODO: replace this with the url to the user-uploaded image
-    image: `https://placem.at/places?w=800&random=${req.userData.email}`,
+    image: `https://placem.at/places?w=800&random=${address}`,
     creator,
     location: coords,
   });
@@ -159,13 +159,15 @@ const updatePlace = async (req, res, next) => {
     );
   }
   // Authorize that the updating place is created by the authenticated user
-  const { userId } = req.userData;
+  // TODO: get userId from token
+  // const { userId } = req.userData;
   // place.creator has a type of ObjectId
-  if (place.creator.toString() !== userId) {
-    return next(
-      new HttpError('You are not authorized to edit this place.', 403)
-    );
-  }
+
+  // // if (place.creator.toString() !== userId) {
+  // //   return next(
+  // //     new HttpError('You are not authorized to edit this place.', 403)
+  // //   );
+  // }
   // Update the place and save
   const { title, description } = req.body;
   place.title = title;
