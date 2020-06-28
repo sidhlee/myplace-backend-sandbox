@@ -28,7 +28,6 @@ const signup = async (req, res, next) => {
       new HttpError('Invalid input values were passed. Please try again', 422)
     );
   }
-
   const { name, email, password } = req.body;
 
   // check if a user with the same email exists
@@ -67,8 +66,9 @@ const signup = async (req, res, next) => {
     email,
     password: hashedPassword,
     places: [],
-    // TODO: replace this with url to the user image uploaded from the client
-    image: `https://placem.at/people?w=400&random=${email}`,
+    // if no file is attached, use default placeholder image
+    image:
+      (req.file && req.file.path) || '/uploads/images/Portrait_Placeholder.png',
   });
 
   try {
