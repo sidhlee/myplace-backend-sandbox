@@ -19,6 +19,14 @@ const fileUpload = multer({
       cb(null, `${new Date().getTime()}.${ext}`);
     },
   }),
+  // Never trust data from client. Sanitization is a MUST
+  fileFilter: (req, file, cb) => {
+    // Does mimetype exists in the map?
+    const isValid = !!MIME_TYPE_MAP[file.mimetype];
+    const error = isValid ? null : new Error('Invalid MIME type.');
+    // arg1 - error, arg2 - accept (boolean)
+    cb(error, isValid);
+  },
 });
 
 module.exports = fileUpload;
