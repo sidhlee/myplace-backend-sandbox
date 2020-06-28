@@ -192,7 +192,7 @@ const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
   let place;
   try {
-    place = Place.findById(placeId).populate('creator');
+    place = await Place.findById(placeId).populate('creator');
   } catch (err) {
     return next(
       new HttpError(
@@ -207,13 +207,16 @@ const deletePlace = async (req, res, next) => {
     );
   }
   // Authorize that the deleting place is created by the authenticated user
-  if (place.creator.toString() !== req.userData.userId) {
-    return next(
-      new HttpError('You are not authorized to delete this place.', 403)
-    );
-  }
+  // if (place.creator.toString() !== req.userData.userId) {
+  //   return next(
+  //     new HttpError('You are not authorized to delete this place.', 403)
+  //   );
+  // }
   // Pull the place from user's places field and delete the place
   try {
+    // if place fields are not found, check if you forgot to add 'await'
+    // in front of Place.findById
+    console.log(place);
     const session = await mongoose.startSession();
     session.startTransaction();
     place.creator.places.pull(place);
@@ -221,6 +224,7 @@ const deletePlace = async (req, res, next) => {
     await place.remove({ session });
     await session.commitTransaction();
   } catch (err) {
+    console.log(err);
     return next(
       new HttpError(
         'Error occurred while deleting place. Please try again.',
