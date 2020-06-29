@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const mongoose = require('mongoose');
 
@@ -12,6 +13,12 @@ const usersRoutes = require('./routes/users-routes');
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use(
+  // without the 1st arg, client can just provide the hostname/filename to the src
+  '/uploads/images/', // file path as requested from client
+  express.static(path.join(__dirname, 'uploads', 'images')) // path to src on disk
+);
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

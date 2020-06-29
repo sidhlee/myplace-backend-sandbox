@@ -67,8 +67,8 @@ const signup = async (req, res, next) => {
     password: hashedPassword,
     places: [],
     // if no file is attached, use default placeholder image
-    image:
-      (req.file && req.file.path) || '/uploads/images/Portrait_Placeholder.png',
+    // Store file name without path (provided from client-side)
+    image: (req.file && req.file.filename) || 'Portrait_Placeholder.png',
   });
 
   try {
