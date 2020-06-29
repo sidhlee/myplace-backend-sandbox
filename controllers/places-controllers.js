@@ -102,8 +102,7 @@ const createPlace = async (req, res, next) => {
     title,
     description,
     address,
-    // TODO: replace this with the url to the user-uploaded image
-    image: `https://placem.at/places?w=800&random=${address}`,
+    image: req.file.filename,
     creator,
     location: coords,
   });
