@@ -210,7 +210,8 @@ const deletePlace = async (req, res, next) => {
   }
 
   // Authorize that the deleting place is created by the authenticated user
-  if (place.creator.toString() !== req.userData.userId) {
+  // Remember! place.creator is populated with User document
+  if (place.creator.id !== req.userData.userId) {
     return next(
       new HttpError('You are not authorized to delete this place.', 403)
     );
@@ -220,7 +221,6 @@ const deletePlace = async (req, res, next) => {
   try {
     // if place fields are not found, check if you forgot to add 'await'
     // in front of Place.findById
-    console.log(place);
     const session = await mongoose.startSession();
     session.startTransaction();
     place.creator.places.pull(place);
