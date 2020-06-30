@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
 
+const fs = require('fs');
+
 const Place = require('../models/place');
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
@@ -231,7 +233,16 @@ const deletePlace = async (req, res, next) => {
       )
     );
   }
-  // TODO: Delete the image file from the storage
+
+  const imageName = place.image;
+  // unlink is an asynchronous function
+  // file path starts without leading '/' !!
+  // './uploads/images/...' gives the same result.
+  // Path starting with folder name means 'search that folder in the current level'
+  fs.unlink(`uploads/images/${imageName}`, (err) => {
+    // this callback will run regardless of whether an error is thrown or not
+    console.log('unlink error while deleting place: ', err);
+  });
 
   // Send response
   return res.status(200).json({ message: 'Place deleted.' });
