@@ -11,9 +11,7 @@ router.get('/:pid', placesControllers.getPlaceById);
 router.get('/user/:uid', placesControllers.getPlacesByUserId);
 
 // post, patch and delete needs userId from the token
-
-// TODO: commented out for dev
-// router.use(verifyToken);
+router.use(verifyToken); // don't need to run the middleware (it's a function, not a factory)
 
 // If successful, userId and email fields are available at req.userData
 

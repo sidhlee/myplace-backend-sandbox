@@ -71,7 +71,7 @@ const createPlace = async (req, res, next) => {
     );
   }
   // Get coordinates with Google geocoding API
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
   let coords;
   try {
     coords = await getCoordsForAddress(address);
@@ -80,7 +80,7 @@ const createPlace = async (req, res, next) => {
   }
 
   // Extract creator id from the token and find the user from db
-  // const creator = req.userData.userId;
+  const creator = req.userData.userId;
   let user;
   try {
     user = await User.findById(creator);
@@ -99,18 +99,18 @@ const createPlace = async (req, res, next) => {
     );
   }
 
-  // Create a new Place mongoose document
-  const newPlace = new Place({
-    title,
-    description,
-    address,
-    image: req.file.filename,
-    creator,
-    location: coords,
-  });
-
-  // Save the place and push the place into user's places field
+  let newPlace;
+  // Create & Save the place and push the place into user's places field
   try {
+    // put this inside try just in case req.file is undefined
+    newPlace = new Place({
+      title,
+      description,
+      address,
+      image: req.file.filename,
+      creator,
+      location: coords,
+    });
     const session = await mongoose.startSession();
     session.startTransaction();
     await newPlace.save({ session });
@@ -160,15 +160,16 @@ const updatePlace = async (req, res, next) => {
     );
   }
   // Authorize that the updating place is created by the authenticated user
-  // TODO: get userId from token
-  // const { userId } = req.userData;
-  // place.creator has a type of ObjectId
 
-  // // if (place.creator.toString() !== userId) {
-  // //   return next(
-  // //     new HttpError('You are not authorized to edit this place.', 403)
-  // //   );
-  // }
+  const { userId } = req.userData;
+
+  // place.creator has a type of ObjectId
+  if (place.creator.toString() !== userId) {
+    return next(
+      new HttpError('You are not authorized to edit this place.', 403)
+    );
+  }
+
   // Update the place and save
   const { title, description } = req.body;
   place.title = title;
@@ -207,12 +208,14 @@ const deletePlace = async (req, res, next) => {
       new HttpError('Could not find the place for the given id.', 404)
     );
   }
+
   // Authorize that the deleting place is created by the authenticated user
-  // if (place.creator.toString() !== req.userData.userId) {
-  //   return next(
-  //     new HttpError('You are not authorized to delete this place.', 403)
-  //   );
-  // }
+  if (place.creator.toString() !== req.userData.userId) {
+    return next(
+      new HttpError('You are not authorized to delete this place.', 403)
+    );
+  }
+
   // Pull the place from user's places field and delete the place
   try {
     // if place fields are not found, check if you forgot to add 'await'
