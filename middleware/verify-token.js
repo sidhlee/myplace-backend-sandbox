@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const HttpError = require('../models/http-error');
 
-const verifyToken = async (req, res, next) => {
+const verifyToken = (req, res, next) => {
   // Allow preflight requests to pass through
   if (req.method === 'OPTIONS') {
     return next();

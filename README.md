@@ -31,3 +31,7 @@ if (existingUser) {
 // getters creates 'id' field where you can access string instead of ObjectId
 return res.status(200).json({ place: place.toObject({ getters: true }) });
 ```
+
+## Upload Images to Cloudinary
+
+- [React Image Upload with Cloudinary, NodeJS and MongoDB](https://medium.com/@towfiqu/react-image-upload-with-cloudinary-nodejs-and-mongodb-baf23e92ba13)
