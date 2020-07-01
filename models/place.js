@@ -15,6 +15,7 @@ const placeSchema = new mongoose.Schema({
     required: true,
     ref: 'User',
   },
+  cloudinaryPublicId: { type: String },
 });
 
 module.exports = mongoose.model('Place', placeSchema);

@@ -106,6 +106,8 @@ const createPlace = async (req, res, next) => {
   }
 
   let newPlace;
+  // TODO: Find a way to display google image on frontend without exposing the API KEY
+  const placePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${process.env.GOOGLE_API_KEY}`;
   // Create & Save the place and push the place into user's places field
   try {
     // put this inside try just in case req.file is undefined
@@ -113,9 +115,10 @@ const createPlace = async (req, res, next) => {
       title,
       description,
       address: formattedAddress,
-      image: req.file.filename, // Cloudinary PublicID
+      image: (req.file && req.file.path) || placePhotoUrl, // Cloudinary PublicID || googlePlace's image
       creator,
       location: coords,
+      cloudinaryPublicId: req.file && req.file.filename,
     });
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -243,13 +246,15 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
-  const publicId = place.image;
-  cloudinary.uploader.destroy(publicId, (err, result) => {
-    if (err) {
-      console.log('Error while deleting the image: ', err);
-    }
-    console.log('Deleting result: ', result);
-  });
+  if (place.cloudinaryPublicId) {
+    const publicId = place.cloudinaryPublicId;
+    cloudinary.uploader.destroy(publicId, (err, result) => {
+      if (err) {
+        console.log('Error while deleting the image: ', err);
+      }
+      console.log('Deleting result: ', result);
+    });
+  }
 
   // Send response
   return res.status(200).json({ message: 'Place deleted.' });
