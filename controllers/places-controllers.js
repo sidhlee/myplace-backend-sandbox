@@ -2,12 +2,10 @@ const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
 const cloudinary = require('cloudinary').v2;
 
-const fs = require('fs');
-
 const Place = require('../models/place');
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
-const { getCoordsForAddress } = require('../utils/location');
+const { getPlaceForText } = require('../utils/location');
 
 const getPlaceById = async (req, res, next) => {
   // Find the place from db with req.params.pid
@@ -74,8 +72,15 @@ const createPlace = async (req, res, next) => {
   // Get coordinates with Google geocoding API
   const { title, description, address } = req.body;
   let coords;
+  let formattedAddress;
+  let photoReference;
   try {
-    coords = await getCoordsForAddress(address);
+    const { formatted_address, geometry, photos } = await getPlaceForText(
+      address
+    );
+    coords = geometry.location;
+    formattedAddress = formatted_address;
+    photoReference = photos[0].photo_reference;
   } catch (err) {
     return next(err); // feeling lazy
   }
@@ -107,7 +112,7 @@ const createPlace = async (req, res, next) => {
     newPlace = new Place({
       title,
       description,
-      address,
+      address: formattedAddress,
       image: req.file.filename, // Cloudinary PublicID
       creator,
       location: coords,
