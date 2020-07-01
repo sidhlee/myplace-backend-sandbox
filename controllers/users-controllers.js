@@ -66,9 +66,8 @@ const signup = async (req, res, next) => {
     email,
     password: hashedPassword,
     places: [],
-    // if no file is attached, use default placeholder image
-    // Store file name without path (provided from client-side)
-    image: (req.file && req.file.filename) || 'Portrait_Placeholder.png',
+    // Cloudinary PublicId
+    image: (req.file && req.file.filename) || '', // Client will show default image for empty string
   });
 
   try {

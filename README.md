@@ -34,4 +34,4 @@ return res.status(200).json({ place: place.toObject({ getters: true }) });
 
 ## Upload Images to Cloudinary
 
-- [React Image Upload with Cloudinary, NodeJS and MongoDB](https://medium.com/@towfiqu/react-image-upload-with-cloudinary-nodejs-and-mongodb-baf23e92ba13)
+- [multer-storage-cloudinary](https://github.com/affanshahid/multer-storage-cloudinary)

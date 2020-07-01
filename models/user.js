@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minLength: 6 },
-  image: { type: String, required: true },
+  image: { type: String }, // user image can be empty string (App will show default user placeholder image)
   places: [{ type: mongoose.ObjectId, required: true, ref: 'Place' }],
 });
 

@@ -1,4 +1,6 @@
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const MIME_TYPE_MAP = {
   'image/png': 'png',
@@ -6,19 +8,24 @@ const MIME_TYPE_MAP = {
   'image/jpeg': 'jpeg',
 };
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'myplace/upload',
+    use_filename: false,
+  },
+});
+
 // multer returns a middleware
 const fileUpload = multer({
   limits: 900000, // size limit: 500kb
-  storage: multer.diskStorage({
-    // configure storage
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/images');
-    },
-    filename: (req, file, cb) => {
-      const ext = MIME_TYPE_MAP[file.mimetype];
-      cb(null, `${new Date().getTime()}.${ext}`);
-    },
-  }),
+  storage,
   // Never trust data from client. Sanitization is a MUST
   fileFilter: (req, file, cb) => {
     // Does mimetype exists in the map?

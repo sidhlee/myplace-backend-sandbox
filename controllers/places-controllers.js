@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
+const cloudinary = require('cloudinary').v2;
 
 const fs = require('fs');
 
@@ -107,7 +108,7 @@ const createPlace = async (req, res, next) => {
       title,
       description,
       address,
-      image: req.file.filename,
+      image: req.file.filename, // Cloudinary PublicID
       creator,
       location: coords,
     });
@@ -237,14 +238,12 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
-  const imageName = place.image;
-  // unlink is an asynchronous function
-  // file path starts without leading '/' !!
-  // './uploads/images/...' gives the same result.
-  // Path starting with folder name means 'search that folder in the current level'
-  fs.unlink(`uploads/images/${imageName}`, (err) => {
-    // this callback will run regardless of whether an error is thrown or not
-    console.log('unlink error while deleting place: ', err);
+  const publicId = place.image;
+  cloudinary.uploader.destroy(publicId, (err, result) => {
+    if (err) {
+      console.log('Error while deleting the image: ', err);
+    }
+    console.log('Deleting result: ', result);
   });
 
   // Send response

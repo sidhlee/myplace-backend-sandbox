@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 const mongoose = require('mongoose');
 
@@ -43,12 +43,14 @@ app.use((error, req, res, next) => {
   console.log(error);
   // If an error occurs while uploading a file, delete the file from the disk
   if (req.file) {
-    fs.unlink(req.file.path, (err) => {
-      // If an error occurs while deleting the file, log the error
-      // (you can easily delete the file manually)
-      console.log('unlink error: ', err);
+    cloudinary.uploader.destroy(req.file.filename, (err, result) => {
+      if (err) {
+        console.log('Error while deleting the image: ', err);
+      }
+      console.log('Deleting result: ', result);
     });
   }
+
   if (res.headerSent) {
     // if any error is thrown after the response is sent,
     // we'll just delegate the error to the next middleware
