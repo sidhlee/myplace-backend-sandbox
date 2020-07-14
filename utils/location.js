@@ -29,7 +29,7 @@ const getCoordsForText = async (placeText) => {
 const getPlaceForText = async (placeText) => {
   const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
     placeText
-  )}&inputtype=textquery&fields=photos,geometry,formatted_address&key=${
+  )}&inputtype=textquery&language=en&fields=photos,geometry,formatted_address&key=${
     process.env.GOOGLE_API_KEY
   }`;
 
