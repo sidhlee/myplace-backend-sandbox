@@ -110,6 +110,18 @@ const createPlace = async (req, res, next) => {
   const placePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${process.env.GOOGLE_API_KEY}`;
   // Create & Save the place and push the place into user's places field
   try {
+    if (!req.file || !req.file.path) {
+      cloudinary.uploader.upload(
+        placePhotoUrl,
+        {
+          folder: 'myplace/upload',
+          use_filename: false,
+        },
+        (err, result) => {
+          req.file.path = result.secure_url;
+        }
+      );
+    }
     // put this inside try just in case req.file is undefined
     newPlace = new Place({
       title,

@@ -4,6 +4,7 @@ const { verifyToken } = require('../middleware/verify-token');
 
 const placesControllers = require('../controllers/places-controllers');
 const fileUpload = require('../middleware/file-upload');
+const getGooglePlace = require('../middleware/get-google-place');
 
 const router = express.Router();
 
@@ -23,13 +24,16 @@ router.post(
     check('description').isLength({ min: 4 }),
     check('address').not().isEmpty(),
   ],
+  getGooglePlace,
   placesControllers.createPlace
 );
+
 router.patch(
   '/:pid',
   [check('title').not().isEmpty(), check('description').isLength({ min: 4 })],
   placesControllers.updatePlace
 );
+
 router.delete('/:pid', placesControllers.deletePlace);
 
 module.exports = router;

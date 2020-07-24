@@ -28,7 +28,7 @@ const fileUpload = multer({
   storage,
   // Never trust data from client. Sanitization is a MUST
   fileFilter: (req, file, cb) => {
-    // Does mimetype exists in the map?
+    // Does mimetype exists in the map? (not undefined)
     const isValid = !!MIME_TYPE_MAP[file.mimetype];
     const error = isValid ? null : new Error('Invalid MIME type.');
     // arg1 - error, arg2 - accept (boolean)
