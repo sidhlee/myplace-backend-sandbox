@@ -5,7 +5,6 @@ const cloudinary = require('cloudinary').v2;
 const Place = require('../models/place');
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
-const { getPlaceForText } = require('../utils/location');
 
 const getPlaceById = async (req, res, next) => {
   // Find the place from db with req.params.pid
@@ -60,30 +59,23 @@ const getPlacesByUserId = async (req, res, next) => {
   });
 };
 
+/**
+ * Creates a place from req.body and save to db
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 const createPlace = async (req, res, next) => {
-  // Validate the request payload
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log(errors);
-    return next(
-      new HttpError('Invalid input values were passed. Please try again.', 422)
-    );
-  }
-  // Get coordinates with Google geocoding API
-  const { title, description, address } = req.body;
-  let coords;
-  let formattedAddress;
-  let photoReference;
-  try {
-    const { formatted_address, geometry, photos } = await getPlaceForText(
-      address
-    );
-    coords = geometry.location;
-    formattedAddress = formatted_address;
-    photoReference = photos[0].photo_reference;
-  } catch (err) {
-    return next(err); // feeling lazy
-  }
+  // req.body is validated in get-google-place middleware
+
+  const { title, description } = req.body;
+  // Provided by get-google-place middleware
+  const {
+    formattedAddress,
+    coords,
+    cloudinaryUrl,
+    cloudinaryPublicId,
+  } = req.place;
 
   // Extract creator id from the token and find the user from db
   const creator = req.userData.userId;
@@ -106,32 +98,17 @@ const createPlace = async (req, res, next) => {
   }
 
   let newPlace;
-  // TODO: Find a way to display google image on frontend without exposing the API KEY
-  const placePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${process.env.GOOGLE_API_KEY}`;
-  // Create & Save the place and push the place into user's places field
   try {
-    if (!req.file || !req.file.path) {
-      cloudinary.uploader.upload(
-        placePhotoUrl,
-        {
-          folder: 'myplace/upload',
-          use_filename: false,
-        },
-        (err, result) => {
-          req.file.path = result.secure_url;
-        }
-      );
-    }
-    // put this inside try just in case req.file is undefined
     newPlace = new Place({
       title,
       description,
       address: formattedAddress,
-      image: (req.file && req.file.path) || placePhotoUrl, // Cloudinary PublicID || googlePlace's image
+      image: cloudinaryUrl,
       creator,
       location: coords,
-      cloudinaryPublicId: req.file && req.file.filename,
+      cloudinaryPublicId,
     });
+
     const session = await mongoose.startSession();
     session.startTransaction();
     await newPlace.save({ session });
