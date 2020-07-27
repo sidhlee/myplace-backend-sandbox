@@ -169,6 +169,8 @@ const login = async (req, res, next) => {
   // Send response with user id, email, and token
   return res.status(200).json({
     userId: user.id,
+    userName: user.name,
+    userImageUrl: user.image,
     email: user.email,
     token,
   });
