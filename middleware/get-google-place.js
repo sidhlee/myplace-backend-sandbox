@@ -28,8 +28,14 @@ const getGooglePlace = async (req, res, next) => {
     );
     coords = geometry.location;
     formattedAddress = formatted_address;
-    photoReference = photos[0].photo_reference;
+    if (!req.file && !photos) {
+      return next(new HttpError('No images available for that address', 404));
+    }
+    if (photos) {
+      photoReference = photos[0].photo_reference;
+    }
   } catch (err) {
+    console.log(err);
     return next(
       new HttpError(
         'Could not get place for the given text from google API',

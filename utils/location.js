@@ -4,7 +4,7 @@ const HttpError = require('../models/http-error');
 const getCoordsForText = async (placeText) => {
   const { data } = await axios.get(
     `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-      address
+      placeText
     )}&key=${process.env.GOOGLE_API_KEY}`
   );
   // Google geocoding status codes:
@@ -26,6 +26,7 @@ const getCoordsForText = async (placeText) => {
  * @param {string} placeText
  * @returns {Place} { formatted_address, geometry, photos }
  */
+
 const getPlaceForText = async (placeText) => {
   const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
     placeText
