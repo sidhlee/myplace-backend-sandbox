@@ -37,10 +37,7 @@ const getGooglePlace = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     return next(
-      new HttpError(
-        'Could not get place for the given text from google API',
-        500
-      )
+      new HttpError('Could not find a place for the given text', 500)
     );
   }
 

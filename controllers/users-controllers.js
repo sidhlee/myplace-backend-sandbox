@@ -59,6 +59,7 @@ const signup = async (req, res, next) => {
       )
     );
   }
+  console.log(req.file);
 
   // Create a new user with given data and save
   const newUser = new User({
@@ -67,7 +68,7 @@ const signup = async (req, res, next) => {
     password: hashedPassword,
     places: [],
     // Cloudinary PublicId
-    image: (req.file && req.file.filename) || '', // Client will show default image for empty string
+    image: (req.file && req.file.path) || '', // Client will show default image for empty string
   });
 
   try {
