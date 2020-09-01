@@ -22,12 +22,15 @@ app.use(
 );
 
 app.use((req, res, next) => {
+  // "We allow access from all origin"
   res.setHeader('Access-Control-Allow-Origin', '*');
+  // "We allow the following headers in the request"
   res.setHeader(
     'Access-Control-Allow-Headers',
     // Origin, X-Requested-With, and Accept are set by the browser
     'Origin, X-Requested-With, Accept, Content-Type, Authorization'
   );
+  // "We allow the following request methods"
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
   next();
 });
@@ -52,8 +55,10 @@ app.use((error, req, res, next) => {
   }
 
   if (res.headerSent) {
-    // if any error is thrown after the response is sent,
-    // we'll just delegate the error to the next middleware
+    // if any error is thrown after the response is sent(or while it is being sent),
+    // we'll just delegate the error to the default Express error handler
+    // which gets triggered when you call next passing an error.
+    //
     return next(error);
   }
   return res
