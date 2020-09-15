@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cloudinary = require('cloudinary').v2;
 
 const HttpError = require('./models/http-error');
 const usersRouter = require('./routes/users-routes');
@@ -33,11 +34,27 @@ app.use(() => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
+  console.log('Global Error->', err);
+
+  // rollback uploaded file on error
+  if (req.file) {
+    console.log('file -> ', req.file);
+    cloudinary.uploader.destroy(req.file.filename, (deleteError, result) => {
+      if (deleteError) console.log('Error deleting file: ', deleteError);
+      console.log('Deleted file: ', req.file.originalname, result);
+    });
+  }
+
+  // if response is already sent, call next middleware with error
   if (res.headerSent) {
+    console.log('[headerSent]');
     return next(err);
   }
-  return res.status(err.code || 500).json({
+  // Multer adds non-number error code (e.g. 'LIMIT_FILE_SIZE) to the error object
+  // which throws express RangeError: Invalid status code
+  const errorCode = typeof err.code === 'number' ? err.code : 500;
+
+  return res.status(errorCode).json({
     message: err.message || 'An unknown error occurred',
   });
 });

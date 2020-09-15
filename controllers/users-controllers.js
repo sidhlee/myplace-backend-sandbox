@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const HttpError = require('../models/http-error');
@@ -34,7 +35,7 @@ const signup = async (req, res, next) => {
     name,
     email,
     password: hashedPassword,
-    image: '', // TODO: add multer to attach uploaded file to req
+    image: (req.file && req.file.path) || '',
     places: [],
   });
 
@@ -44,11 +45,21 @@ const signup = async (req, res, next) => {
     return next(new HttpError('Could not signup. Please try again.', 500));
   }
 
-  // TODO: save user info into a jwt and include it in response body
+  const token = jwt.sign(
+    {
+      userId: newUser.id,
+      email: newUser.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '1h',
+    }
+  );
 
   return res.status(201).json({
     userId: newUser.id,
     email: newUser.email,
+    token,
   });
 };
 
@@ -74,13 +85,24 @@ const login = async (req, res, next) => {
       new HttpError('Please check your password and try again.', 401)
     );
   }
-  // TODO: create jwt with user data and include it in response body
+
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '1h',
+    }
+  );
 
   return res.status(200).json({
     userId: user.id,
     userName: user.name,
     email: user.email,
     userImageUrl: user.image,
+    token,
   });
 };
 
