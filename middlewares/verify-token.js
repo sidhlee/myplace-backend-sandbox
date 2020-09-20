@@ -9,7 +9,8 @@ const verifyToken = (req, res, next) => {
     return next(new HttpError('Missing authorization header.', 401));
 
   // req.headers.authorization => 'bearer TOKEN'
-  const token = req.headers.authorization.split(' ')[1];
+  const token = req.headers.authorization;
+
   if (!token)
     return next(
       new HttpError('Token is missing from the authorization header', 401)

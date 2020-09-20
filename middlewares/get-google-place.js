@@ -36,10 +36,11 @@ const getGooglePlace = async (req, res, next) => {
   }
   // get photoReference from place
   const { formatted_address, geometry, photos } = place;
-  if (!photos || !photos[0] || !photos[0].photoReference) {
+
+  if (!photos || !photos[0] || !photos[0].photo_reference) {
     return next(new HttpError('No images available for that address.', 422));
   }
-  const { photoReference } = photos[0];
+  const { photo_reference } = photos[0];
 
   let imageUrl;
   let imageId;
@@ -47,7 +48,7 @@ const getGooglePlace = async (req, res, next) => {
   // if no file was uploaded, upload google place photo to cloudinary
   if (!req.file || !req.file.path) {
     // https://developers.google.com/places/web-service/photos
-    const placePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${process.env.GOOGLE_KEY}`;
+    const placePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo_reference}&key=${process.env.GOOGLE_KEY}`;
     try {
       // https://cloudinary.com/documentation/image_upload_api_reference#sample_response
       const uploadResponse = await cloudinary.uploader.upload(placePhotoUrl, {

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
 
 const Place = require('../models/place');
@@ -58,11 +59,38 @@ const createPlace = async (req, res, next) => {
   // find the user from db with creator id
   let user;
   try {
-  } catch (err) {}
+    user = await User.findById(creator);
+  } catch (err) {
+    return next(
+      new HttpError('An error occurred while finding the creator'),
+      500
+    );
+  }
+  if (!user)
+    return next(
+      new HttpError('Could not find the creator from the database', 422)
+    );
 
   // save the new place and push it to the creator's places array
-
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await newPlace.save({ session });
+    user.places.push(newPlace);
+    user.save({ session });
+    await session.commitTransaction(); // returns a Promise
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while saving the new place. Please try again,',
+        500
+      )
+    );
+  }
   // return response with the new place
+  return res.status(201).json({
+    place: newPlace,
+  });
 };
 const updatePlace = async (req, res, next) => {};
 const deletePlace = async (req, res, next) => {};
