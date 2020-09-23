@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
+const cloudinary = require('cloudinary').v2;
 
 const Place = require('../models/place');
 const User = require('../models/user');
@@ -46,7 +47,7 @@ const createPlace = async (req, res, next) => {
   // create a new place from req.body, userData and place
   const { title, description } = req.body;
   const creator = req.userData.userId; //  added by middleware(verify-token)
-  const { formatted_address, location, imageUrl } = req.place; // added by middleware(get-google-place)
+  const { formatted_address, location, imageUrl, imageId } = req.place; // added by middleware(get-google-place)
   const newPlace = new Place({
     title,
     description,
@@ -54,6 +55,7 @@ const createPlace = async (req, res, next) => {
     creator,
     image: imageUrl,
     location,
+    imageId,
   });
 
   // find the user from db with creator id
@@ -132,7 +134,52 @@ const updatePlace = async (req, res, next) => {
 
   return res.json({ place: place.toObject({ getters: true }) });
 };
-const deletePlace = async (req, res, next) => {};
+const deletePlace = async (req, res, next) => {
+  const { pid } = req.params;
+  let place;
+  try {
+    place = await Place.findById(pid).populate('creator');
+  } catch (err) {
+    return next(
+      new HttpError('An error occurred while finding the place.', 500)
+    );
+  }
+  if (!place) {
+    return next(
+      new HttpError('Could not find the place for the given id.', 422)
+    );
+  }
+
+  const { userId } = req.userData;
+  if (userId !== place.creator.id) {
+    // creator is populated with the user document
+    return next(
+      new HttpError('You are not authorized to delete this place.', 403)
+    );
+  }
+
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    place.creator.places.pull(place);
+    await place.creator.save({ session });
+    await place.remove({ session });
+    await session.commitTransaction();
+  } catch (err) {
+    return next(new HttpError('Could not delete the place.', 500));
+  }
+
+  if (place.imageId) {
+    cloudinary.uploader.destroy(place.imageId, (err, result) => {
+      if (err) {
+        console.log('Error while deleting the place.', err);
+      }
+      console.log('Place Image deleted: ', result);
+    });
+  }
+
+  return res.json({ message: 'Place deleted.' });
+};
 
 module.exports = {
   getPlaceById,
