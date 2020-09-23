@@ -36,7 +36,7 @@ const getPlacesByUserId = async (req, res, next) => {
   });
 };
 const createPlace = async (req, res, next) => {
-  // validate payloads
+  // validate payloads from the client
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(
@@ -44,9 +44,9 @@ const createPlace = async (req, res, next) => {
     );
   }
   // create a new place from req.body, userData and place
-  const { title, description, address } = req.body;
-  const creator = req.userData.userId;
-  const { formatted_address, location, imageUrl } = req.place;
+  const { title, description } = req.body;
+  const creator = req.userData.userId; //  added by middleware(verify-token)
+  const { formatted_address, location, imageUrl } = req.place; // added by middleware(get-google-place)
   const newPlace = new Place({
     title,
     description,
