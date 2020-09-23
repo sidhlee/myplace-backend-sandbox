@@ -92,7 +92,46 @@ const createPlace = async (req, res, next) => {
     place: newPlace,
   });
 };
-const updatePlace = async (req, res, next) => {};
+const updatePlace = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(new HttpError('Invalid inputs were passed', 422));
+  }
+
+  const { pid } = req.params;
+  let place;
+  try {
+    place = await Place.findById(pid);
+  } catch (err) {
+    return next(
+      new HttpError('An error occurred while finding the place.', 500)
+    );
+  }
+  if (!place) {
+    return next(new HttpError('Could not find a place for the given id'));
+  }
+
+  const { userId } = req.userData;
+  if (place.creator.toString() !== userId) {
+    return next(
+      new HttpError('You are not authorized to edit this place.', 403)
+    );
+  }
+
+  const { title, description } = req.body;
+  place.title = title;
+  place.description = description;
+  try {
+    await place.save();
+  } catch (err) {
+    return next(
+      new HttpError('Could not update the place. Please try again.', 500)
+    );
+  }
+
+  return res.json({ place: place.toObject({ getters: true }) });
+};
 const deletePlace = async (req, res, next) => {};
 
 module.exports = {
