@@ -4,10 +4,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
+const HttpError = require('./models/http-error');
 
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use(() => {
+  throw new HttpError('Could not find the requested page.', 404);
+})
 
 app.use((err, req, res, next) => {
   console.log(err);
