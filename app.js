@@ -9,7 +9,15 @@ const app = express();
 
 app.use(bodyParser.json());
 
-
+app.use((err, req, res, next) => {
+  console.log(err);
+  if (res.headerSent) {
+    return next(err);
+  }
+  return res.status(err.code || 500).json({
+    message: err.message || 'An unknown error occurred.'
+  })
+})
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true}, (mongoError) => {
   if (mongoError) { console.log('Error connecting to mongoDB...'); }
