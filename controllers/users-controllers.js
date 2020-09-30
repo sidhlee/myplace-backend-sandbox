@@ -58,7 +58,7 @@ const signup = async (req, res, next) => {
     name,
     email,
     password: hashedPassword,
-    image: '',
+    image: (req.file && req.file.path) || '',
     places: [],
   });
 
