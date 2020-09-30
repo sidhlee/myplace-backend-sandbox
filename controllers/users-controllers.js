@@ -27,14 +27,6 @@ const getUsers = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log(errors);
-    return next(
-      new HttpError('Invalid inputs were passed. Please try again.', 422)
-    );
-  }
-
   const { email, name, password } = req.body;
 
   let existingUser;

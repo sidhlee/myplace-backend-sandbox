@@ -3,6 +3,7 @@ const { check } = require('express-validator');
 
 const { getUsers, signup, login } = require('../controllers/users-controllers');
 const fileUpload = require('../middlewares/file-upload');
+const validate = require('../middlewares/validate');
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.post(
     check('email').normalizeEmail().isEmail(),
     check('password').isLength({ min: 6 }),
   ],
+  validate,
   signup
 );
 
