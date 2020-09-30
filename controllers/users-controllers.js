@@ -90,7 +90,52 @@ const signup = async (req, res, next) => {
     token,
   });
 };
-const login = async (req, res, next) => {};
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let user;
+  try {
+    user = await User.findOne({ email });
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while finding the user. Please try again later.',
+        500
+      )
+    );
+  }
+
+  if (!user) {
+    return next(new HttpError('Please check your email and try again.', 422));
+  }
+
+  const isPasswordValid = bcrypt.compareSync(password, user.password);
+  if (!isPasswordValid) {
+    return next(
+      new HttpError('Please check your password and try again.', 422)
+    );
+  }
+
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '1h',
+    }
+  );
+
+  return res.status(200).json({
+    userId: user.id,
+    email: user.email,
+    userName: user.name,
+    userImageUrl: user.image,
+    token,
+  });
+};
 
 module.exports = {
   getUsers,
