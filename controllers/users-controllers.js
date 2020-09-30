@@ -1,3 +1,7 @@
+const { validationResult } = require('express-validator');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
 
@@ -22,7 +26,70 @@ const getUsers = async (req, res, next) => {
   });
 };
 
-const signup = async (req, res, next) => {};
+const signup = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(
+      new HttpError('Invalid inputs were passed. Please try again.', 422)
+    );
+  }
+
+  const { email, name, password } = req.body;
+
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email });
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while checking an existing user. Please try again.',
+        500
+      )
+    );
+  }
+
+  if (existingUser) {
+    return next(new HttpError('Email already exists.', 422));
+  }
+
+  const hashedPassword = bcrypt.hashSync(password, 12);
+  const newUser = new User({
+    name,
+    email,
+    password: hashedPassword,
+    image: '',
+    places: [],
+  });
+
+  try {
+    await newUser.save();
+  } catch (err) {
+    return next(
+      new HttpError(
+        'An error occurred while saving the user to the database. Please try again later.',
+        500
+      )
+    );
+  }
+
+  const token = jwt.sign(
+    {
+      userId: newUser.id,
+      email: newUser.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '1h',
+    }
+  );
+
+  return res.status(201).json({
+    userId: newUser.id,
+    email: newUser.email,
+    token,
+  });
+};
 const login = async (req, res, next) => {};
 
 module.exports = {
