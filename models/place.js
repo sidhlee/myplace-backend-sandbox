@@ -7,6 +7,7 @@ const placeSchema = mongoose.Schema({
   },
   description: {
     type: String,
+    required: true,
     minLength: 4,
   },
   address: {
