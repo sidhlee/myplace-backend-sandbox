@@ -7,6 +7,7 @@ const {
   updatePlace,
   deletePlace,
 } = require('../controllers/places-controllers');
+const getGooglePlace = require('../middlewares/get-google-place');
 const validate = require('../middlewares/validate');
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.post(
     check('address').not().isEmpty(),
   ],
   validate,
+  getGooglePlace,
   createPlace
 );
 router.patch(
@@ -32,4 +34,4 @@ router.patch(
 );
 router.delete('/:pid', deletePlace);
 
-module.export = router;
+module.exports = router;

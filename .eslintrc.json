@@ -10,6 +10,8 @@
   },
   "rules": {
     "no-console": "off",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "camelcase": "off",
+    "prefer-destructuring": "warn"
   }
 }

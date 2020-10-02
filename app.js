@@ -14,7 +14,7 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use('/api/users', usersRouter);
-// app.use('/api/places', placesRouter);
+app.use('/api/places', placesRouter);
 
 app.use(() => {
   throw new HttpError('Could not find the requested page.', 404);
