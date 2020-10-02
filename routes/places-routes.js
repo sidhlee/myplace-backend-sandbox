@@ -7,6 +7,7 @@ const {
   updatePlace,
   deletePlace,
 } = require('../controllers/places-controllers');
+const fileUpload = require('../middlewares/file-upload');
 const getGooglePlace = require('../middlewares/get-google-place');
 const validate = require('../middlewares/validate');
 
@@ -23,6 +24,7 @@ router.post(
     check('address').not().isEmpty(),
   ],
   validate,
+  fileUpload.single('image'),
   getGooglePlace,
   createPlace
 );

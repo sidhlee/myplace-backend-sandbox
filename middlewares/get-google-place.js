@@ -34,11 +34,12 @@ const getGooglePlace = async (req, res, next) => {
   // https://developers.google.com/places/web-service/photos#photo_references
   const { photo_reference } = photos[0];
 
-  // if no image is uploaded, save photo_reference to cloudinary
-  // and get image path and public id
+  // get image url and id from either user-uploaded image or google place photo
   let imageUrl;
   let imageId;
   if (!req.file || req.file.path) {
+    // if no image is uploaded, save photo_reference to cloudinary
+    // and get image path and public id
     try {
       const referencedImage = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo_reference}&key=${process.env.GOOGLE_API}`;
       const uploadResponse = cloudinary.uploader.upload(referencedImage, {
