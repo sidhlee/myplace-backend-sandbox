@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
 
 const bodyParser = require('body-parser');
 const HttpError = require('./models/http-error');
@@ -25,6 +26,14 @@ app.use((err, req, res, next) => {
   if (res.headerSent) {
     return next(err);
   }
+
+  cloudinary.uploader.destroy(req.place.imageId, (error, result) => {
+    if (error) {
+      console.log('Failed deleting image.', error);
+    } else {
+      console.log('Deleted image.', result);
+    }
+  });
   return res.status(err.code || 500).json({
     message: err.message || 'An unknown error occurred.',
   });
