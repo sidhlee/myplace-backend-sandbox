@@ -42,10 +42,11 @@ const getGooglePlace = async (req, res, next) => {
     // and get image path and public id
     try {
       const referencedImage = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo_reference}&key=${process.env.GOOGLE_API}`;
-      const uploadResponse = cloudinary.uploader.upload(referencedImage, {
-        folder: '/myplace/upload/',
+      const uploadResponse = await cloudinary.uploader.upload(referencedImage, {
+        folder: '/myplace/run6/',
         use_filename: false,
       });
+
       imageUrl = uploadResponse.url;
       imageId = uploadResponse.public_id;
     } catch (err) {

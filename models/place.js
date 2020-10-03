@@ -18,6 +18,10 @@ const placeSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  imageId: {
+    type: String,
+    required: true,
+  },
   creator: {
     type: mongoose.ObjectId,
     required: true,
