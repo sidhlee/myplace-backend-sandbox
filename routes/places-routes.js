@@ -10,11 +10,14 @@ const {
 const fileUpload = require('../middlewares/file-upload');
 const getGooglePlace = require('../middlewares/get-google-place');
 const validate = require('../middlewares/validate');
+const verifyToken = require('../middlewares/verify-token');
 
 const router = express.Router();
 
 router.get('/:pid', getPlaceById);
 router.get('/:uid', getPlacesByUserId);
+
+router.use(verifyToken);
 
 router.post(
   '/',
