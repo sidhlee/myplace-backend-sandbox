@@ -15,7 +15,7 @@ const verifyToken = require('../middlewares/verify-token');
 const router = express.Router();
 
 router.get('/:pid', getPlaceById);
-router.get('/:uid', getPlacesByUserId);
+router.get('/user/:uid', getPlacesByUserId);
 
 router.use(verifyToken);
 
