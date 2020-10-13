@@ -21,13 +21,15 @@ router.use(verifyToken);
 
 router.post(
   '/',
+  // multer middleware has to come before express-validator
+  // to be able to parse the multipart/form-data
+  fileUpload.single('image'),
   [
     check('title').not().isEmpty(),
     check('description').isLength({ min: 4 }),
     check('address').not().isEmpty(),
   ],
   validate,
-  fileUpload.single('image'),
   getGooglePlace,
   createPlace
 );

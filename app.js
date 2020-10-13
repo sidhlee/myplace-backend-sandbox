@@ -31,13 +31,21 @@ app.use(async (err, req, res, next) => {
 
   // If the error was thrown after saving the place image,
   // destroy saved image from cloudinary
-  const publicId = req.place && req.place.imageId;
-  if (publicId) {
-    await destroyImage(publicId);
+
+  if (req.place && req.place.imageId) {
+    await destroyImage(req.place.imageId);
+    console.log('Rolled back uploading the Google place image to Cloudinary.');
+  } else if (req.file && req.file.filename) {
+    // if req.place doesn't exist, it means that the error was thrown before getGooglePlace middleware
+    // So check for the image uploaded from multer and destroy it.
+    await destroyImage(req.file.filename);
+    console.log('Rolled back uploading the place image to Cloudinary.');
   }
 
-  // Send error message with code
-  return res.status(err.code || 500).json({
+  // Send error message with status
+
+  // error.code is a string label for identifying the type of error(eg. 'LIMIT_FILE_SIZE')
+  return res.status(err.status || 500).json({
     message: err.message || 'An unknown error occurred.',
   });
 });
@@ -47,6 +55,7 @@ mongoose.connect(
   { useNewUrlParser: true, useUnifiedTopology: true },
   (mongoError) => {
     if (mongoError) {
+      console.log(mongoError);
       console.log('Error connecting to mongoDB...');
     } else {
       console.log('connected to db...');

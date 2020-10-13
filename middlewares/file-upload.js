@@ -32,3 +32,12 @@ const fileUpload = multer({
 });
 
 module.exports = fileUpload;
+
+/* 
+<File properties>
+File objects will expose the following properties mapped from the Cloudinary API:
+
+filename - public_id of the file on cloudinary
+path	- A URL for fetching the file
+size	- Size of the file in bytes
+*/

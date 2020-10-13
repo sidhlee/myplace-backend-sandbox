@@ -37,7 +37,8 @@ const getGooglePlace = async (req, res, next) => {
   // get image url and id from either user-uploaded image or google place photo
   let imageUrl;
   let imageId;
-  if (!req.file || req.file.path) {
+
+  if (!req.file || !req.file.path) {
     // if no image is uploaded, save photo_reference to cloudinary
     // and get image path and public id
     try {
