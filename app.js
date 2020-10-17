@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
 const HttpError = require('./models/http-error');
 
 const usersRouter = require('./routes/users-routes');
@@ -14,6 +15,22 @@ const destroyImage = require('./utils/destroyImage');
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use(helmet());
+
+// handle CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Accept, Content-Type, Authorization'
+  );
+  if (req.method === 'OPTION') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+    return res.status(200).json({});
+  }
+  next();
+});
 
 app.use('/api/users', usersRouter);
 app.use('/api/places', placesRouter);
