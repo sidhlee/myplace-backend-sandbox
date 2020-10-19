@@ -29,7 +29,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
     return res.status(200).json({});
   }
-  next();
+  return next();
 });
 
 app.use('/api/users', usersRouter);
@@ -56,7 +56,7 @@ app.use(async (err, req, res, next) => {
     // if req.place doesn't exist, it means that the error was thrown before getGooglePlace middleware
     // So check for the image uploaded from multer and destroy it.
     await destroyImage(req.file.filename);
-    console.log('Rolled back uploading the place image to Cloudinary.');
+    console.log('Rolled back uploading the image to Cloudinary.'); // image can be either place image or user image
   }
 
   // Send error message with status
