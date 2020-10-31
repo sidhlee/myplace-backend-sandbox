@@ -25,7 +25,7 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Accept, Content-Type, Authorization'
   );
-  if (req.method === 'OPTION') {
+  if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
     return res.status(200).json({});
   }
@@ -72,13 +72,13 @@ mongoose.connect(
   { useNewUrlParser: true, useUnifiedTopology: true },
   (mongoError) => {
     if (mongoError) {
-      console.log(mongoError);
       console.log('Error connecting to mongoDB...');
+      console.log(mongoError);
     } else {
       console.log('connected to db...');
+      app.listen(process.env.PORT || 5000, () => {
+        console.log(`Listening to port: ${process.env.PORT || 5000}`);
+      });
     }
-    app.listen(process.env.PORT || 5000, () => {
-      console.log(`Listening to port: ${process.env.PORT || 5000}`);
-    });
   }
 );

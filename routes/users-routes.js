@@ -11,6 +11,10 @@ router.get('/', getUsers);
 
 router.post(
   '/signup',
+  // multer parses multipart/form-data which is used for sending binary files
+  // (bodyParser does not handle multipart bodies)
+  // so you need to put this BEFORE validation so that the middleware
+  // can find each field in the body object
   fileUpload.single('image'),
   // must include validation when pushing into the db
   [
