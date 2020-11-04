@@ -2,6 +2,13 @@ const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 const HttpError = require('../models/http-error');
 
+/**
+ * Get formatted address and location from Google Place API
+ * with the address entered by the user,
+ * and save the image to the cloudinary.
+ * The image will either be uploaded from the user or
+ * returned from the Place Photo Request.
+ */
 const getGooglePlace = async (req, res, next) => {
   const { address } = req.body;
   // encodeURIComponent encodes the entire string including protocol and domain name
